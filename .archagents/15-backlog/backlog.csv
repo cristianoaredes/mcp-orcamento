@@ -1,2 +1,2 @@
 id,slug,title,status,priority,type,effort,source,reopened_count,rollback_commit,hotfix_for,escaped_defect,created_at,done_at
-TCK-0001,spc-0001-implementacao-inicial-mcp-orcamento-v0-1-0-8-tools-worker-safe-siconfi,[SPC-0001] Implementação inicial mcp-orcamento v0.1.0 (8 tools Worker-safe SICONFI/Transferegov/SADIPEM),verifying,medium,feature,M,spec,,,,,2026-11-21T17:59:50Z,
+TCK-0001,spc-0001-implementacao-inicial-mcp-orcamento-v0-1-0-8-tools-worker-safe-siconfi,[SPC-0001] Implementação inicial mcp-orcamento v0.1.0 (8 tools Worker-safe SICONFI/Transferegov/SADIPEM),done,medium,feature,M,spec,,,,,2026-11-21T17:59:50Z,
