@@ -149,7 +149,16 @@ export const SiconfiRgfSchema = z
     page: z.number().int().min(1).max(100).optional().default(1),
     limit: z.number().int().min(1).max(50).optional().default(30),
   })
-  .strict();
+  .strict()
+  .superRefine((val, ctx) => {
+    if (val.in_periodicidade === "S" && val.nr_periodo > 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["nr_periodo"],
+        message: "nr_periodo deve ser 1 ou 2 quando in_periodicidade='S'",
+      });
+    }
+  });
 
 export const SiconfiDcaSchema = z
   .object({

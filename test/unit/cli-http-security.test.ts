@@ -1,7 +1,7 @@
 import http from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseCliArgs } from "../../lib/adapters/cli.js";
-import { startHttpServer, type RunningHttpServer } from "../../lib/adapters/cli-http.js";
+import { createHttpApp, startHttpServer, type RunningHttpServer } from "../../lib/adapters/cli-http.js";
 import { MemoryCache } from "../../lib/core/cache.js";
 import type { ApiConfig, ServerConfig } from "../../lib/types/index.js";
 
@@ -344,5 +344,62 @@ describe("CLI HTTP Server Security & Transports", () => {
       req.on("error", reject);
     });
     expect(sseEndpoint).toContain("/messages?sessionId=");
+  });
+
+  it("enforces fail-closed MCP_API_KEY outside loopback and strict Host/Origin syntax", async () => {
+    const cache = new MemoryCache(16, 60_000, 0);
+    caches.push(cache);
+
+    expect(() =>
+      createHttpApp({
+        apiConfig: API_CONFIG,
+        serverConfig: { ...BASE_SERVER_CONFIG, httpHost: "0.0.0.0" },
+        cache,
+      })
+    ).toThrow(/non-loopback host/);
+
+    const created = createHttpApp({
+      apiConfig: API_CONFIG,
+      serverConfig: { ...BASE_SERVER_CONFIG, httpHost: "0.0.0.0" },
+      cache,
+      apiKey: "non-loopback-secret",
+    });
+    await created.cleanup();
+
+    const running = await startHttpServer({
+      apiConfig: API_CONFIG,
+      serverConfig: BASE_SERVER_CONFIG,
+      cache,
+      apiKey: "sec-key-2",
+    });
+    servers.push(running);
+
+    const badHostSyntax = await rawHttpRequest({
+      port: running.port,
+      path: "/health",
+      headers: { Host: "localhost:notaport" },
+    });
+    expect(badHostSyntax.status).toBe(400);
+
+    const credOrigin = `${"http://"}demo-user${":"}demo-token@localhost:5173`;
+    const badCredOrigin = await rawHttpRequest({
+      port: running.port,
+      path: "/health",
+      headers: {
+        Host: `127.0.0.1:${running.port}`,
+        Origin: credOrigin,
+      },
+    });
+    expect(badCredOrigin.status).toBe(403);
+
+    const badPathOrigin = await rawHttpRequest({
+      port: running.port,
+      path: "/health",
+      headers: {
+        Host: `127.0.0.1:${running.port}`,
+        Origin: "http://localhost:5173/evil",
+      },
+    });
+    expect(badPathOrigin.status).toBe(403);
   });
 });

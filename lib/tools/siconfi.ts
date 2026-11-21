@@ -294,17 +294,18 @@ export async function handleSiconfiExtratoEntregas(
   };
 }
 
-function isExactOrdsAnexoPrefix(noAnexo: string | undefined, prefix: string): boolean {
-  return typeof noAnexo === "string" && noAnexo.toUpperCase().startsWith(prefix);
+function normalizeOrdsAnexoPrefix(noAnexo: string | undefined, prefix: string): string | undefined {
+  if (typeof noAnexo !== "string") return undefined;
+  const trimmed = noAnexo.trim();
+  if (!trimmed.toUpperCase().startsWith(prefix)) return undefined;
+  return `${prefix}${trimmed.slice(prefix.length).replace(/^anexo\b/i, "Anexo")}`;
 }
 
 export async function handleSiconfiRreo(
   args: SiconfiRreoArgs,
   context: ToolExecutionContext
 ): Promise<LookupResult> {
-  const upstreamAnexo = isExactOrdsAnexoPrefix(args.no_anexo, "RREO-")
-    ? args.no_anexo
-    : undefined;
+  const upstreamAnexo = normalizeOrdsAnexoPrefix(args.no_anexo, "RREO-");
   const url = buildOrdsUrl(context.apiConfig.tesouroOrdsBaseUrl, "siconfi/tt/rreo", {
     an_exercicio: args.an_exercicio,
     nr_periodo: args.nr_periodo,
@@ -352,9 +353,7 @@ export async function handleSiconfiRgf(
   args: SiconfiRgfArgs,
   context: ToolExecutionContext
 ): Promise<LookupResult> {
-  const upstreamAnexo = isExactOrdsAnexoPrefix(args.no_anexo, "RGF-")
-    ? args.no_anexo
-    : undefined;
+  const upstreamAnexo = normalizeOrdsAnexoPrefix(args.no_anexo, "RGF-");
   const url = buildOrdsUrl(context.apiConfig.tesouroOrdsBaseUrl, "siconfi/tt/rgf", {
     an_exercicio: args.an_exercicio,
     in_periodicidade: args.in_periodicidade,
@@ -406,9 +405,7 @@ export async function handleSiconfiDca(
   args: SiconfiDcaArgs,
   context: ToolExecutionContext
 ): Promise<LookupResult> {
-  const upstreamAnexo = isExactOrdsAnexoPrefix(args.no_anexo, "DCA-")
-    ? args.no_anexo
-    : undefined;
+  const upstreamAnexo = normalizeOrdsAnexoPrefix(args.no_anexo, "DCA-");
   const url = buildOrdsUrl(context.apiConfig.tesouroOrdsBaseUrl, "siconfi/tt/dca", {
     an_exercicio: args.an_exercicio,
     id_ente: args.id_ente,

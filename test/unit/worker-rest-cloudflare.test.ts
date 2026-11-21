@@ -240,6 +240,12 @@ describe("Worker REST, MCP Endpoint & Cloudflare Adapter", () => {
     );
     expect(nestedTool.status).toBe(404);
 
+    const malformedEncoding = await handleWorkerFetch(
+      new Request("https://worker.test/tools/%E0%A4%A", { method: "POST", body: "{}" }),
+      {}
+    );
+    expect(malformedEncoding.status).toBe(400);
+
     const unknownRoute = await handleWorkerFetch(
       new Request("https://worker.test/nonexistent", { method: "GET" }),
       {}

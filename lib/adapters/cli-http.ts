@@ -4,6 +4,7 @@
  * timing-safe API key auth, security headers, 100KB body limit, and sliding-window rate limiting.
  */
 
+import { createHash, timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
@@ -27,9 +28,20 @@ import {
 } from "../infrastructure/tracing.js";
 import { SERVER } from "../shared/utils/constants.js";
 import type { ApiConfig, Cache, MCPRequest, ServerConfig } from "../types/index.js";
-import { constantTimeEqual } from "../workers/auth.js";
 
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
+
+export function isLoopbackHost(host: string): boolean {
+  if (typeof host !== "string") return false;
+  return LOOPBACK_HOSTS.has(host.trim().toLowerCase());
+}
+
+export function isValidApiKey(provided: string, expected: string): boolean {
+  if (!provided || !expected) return false;
+  const providedDigest = createHash("sha256").update(provided, "utf8").digest();
+  const expectedDigest = createHash("sha256").update(expected, "utf8").digest();
+  return timingSafeEqual(providedDigest, expectedDigest);
+}
 
 export interface HttpServerOptions {
   apiConfig: ApiConfig;
@@ -49,14 +61,29 @@ export interface RunningHttpServer {
   close: () => Promise<void>;
 }
 
-function normalizeHostHeader(rawHost: string): string {
+function normalizeHostHeader(rawHost: string): string | null {
   const trimmed = rawHost.trim().toLowerCase();
-  if (trimmed.startsWith("[")) {
-    const endIdx = trimmed.indexOf("]");
-    return endIdx >= 0 ? trimmed.slice(0, endIdx + 1) : trimmed;
+  if (!trimmed || /[\s/@\\?#]/.test(trimmed)) {
+    return null;
   }
-  const colonIdx = trimmed.indexOf(":");
-  return colonIdx >= 0 ? trimmed.slice(0, colonIdx) : trimmed;
+  if (trimmed.startsWith("[")) {
+    const match = /^\[([a-f0-9:.]+)\](?::(\d{1,5}))?$/.exec(trimmed);
+    if (!match) return null;
+    if (match[2] !== undefined) {
+      const port = Number(match[2]);
+      if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
+    }
+    return `[${match[1]}]`;
+  }
+  const firstColon = trimmed.indexOf(":");
+  if (firstColon === -1) return trimmed;
+  if (firstColon !== trimmed.lastIndexOf(":")) return null;
+  const hostname = trimmed.slice(0, firstColon);
+  const portStr = trimmed.slice(firstColon + 1);
+  if (!hostname || !/^\d{1,5}$/.test(portStr)) return null;
+  const port = Number(portStr);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
+  return hostname;
 }
 
 function isOriginAllowed(origin: string, explicitAllowlist?: string[]): boolean {
@@ -65,10 +92,18 @@ function isOriginAllowed(origin: string, explicitAllowlist?: string[]): boolean 
   }
   try {
     const parsed = new URL(origin);
-    return (
-      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
-      LOOPBACK_HOSTS.has(parsed.hostname.toLowerCase())
-    );
+    if (
+      (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+      parsed.username ||
+      parsed.password ||
+      parsed.pathname !== "/" ||
+      parsed.search !== "" ||
+      parsed.hash !== "" ||
+      origin.endsWith("/")
+    ) {
+      return false;
+    }
+    return LOOPBACK_HOSTS.has(parsed.hostname.toLowerCase());
   } catch {
     return false;
   }
@@ -121,6 +156,11 @@ export function createHttpApp(options: HttpServerOptions): {
   const configuredApiKey =
     options.apiKey ?? process.env.MCP_API_KEY ?? process.env.API_KEY;
   const bindHost = (options.serverConfig.httpHost || "127.0.0.1").trim();
+  if (!isLoopbackHost(bindHost) && (!configuredApiKey || configuredApiKey.trim().length === 0)) {
+    throw new Error(
+      `Refusing to bind HTTP MCP server to non-loopback host "${bindHost}" without MCP_API_KEY`
+    );
+  }
   const explicitAllowedHosts = options.allowedHosts ?? parseListEnv("MCP_ALLOWED_HOSTS");
   const explicitAllowedOrigins =
     options.allowedOrigins ??
@@ -161,8 +201,14 @@ export function createHttpApp(options: HttpServerOptions): {
     }
 
     const hostname = normalizeHostHeader(rawHost);
+    if (!hostname) {
+      res.status(400).json({ error: "Invalid Host header" });
+      return;
+    }
     if (explicitAllowedHosts && explicitAllowedHosts.length > 0) {
-      const allowedNormalized = explicitAllowedHosts.map((h) => normalizeHostHeader(h));
+      const allowedNormalized = explicitAllowedHosts
+        .map((h) => normalizeHostHeader(h))
+        .filter((h): h is string => h !== null);
       if (!allowedNormalized.includes(hostname)) {
         res.status(403).json({ error: "Forbidden Host header" });
         return;
@@ -252,7 +298,7 @@ export function createHttpApp(options: HttpServerOptions): {
       res.status(401).json({ error: "Unauthorized: missing API key" });
       return;
     }
-    if (!constantTimeEqual(token, configuredApiKey)) {
+    if (!configuredApiKey || !isValidApiKey(token, configuredApiKey)) {
       res.status(403).json({ error: "Forbidden: invalid API key" });
       return;
     }

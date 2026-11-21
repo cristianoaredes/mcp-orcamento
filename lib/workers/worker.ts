@@ -177,7 +177,18 @@ export async function handleWorkerFetch(
     }
 
     if (pathname.startsWith("/tools/")) {
-      const toolName = decodeURIComponent(pathname.slice("/tools/".length));
+      let toolName: string;
+      try {
+        toolName = decodeURIComponent(pathname.slice("/tools/".length));
+      } catch {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Invalid URL encoding in tool route" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json", ...commonHeaders, ...rlHeaders },
+          }
+        );
+      }
       if (!toolName || toolName.includes("/")) {
         return new Response(JSON.stringify({ ok: false, error: "Invalid tool route" }), {
           status: 404,

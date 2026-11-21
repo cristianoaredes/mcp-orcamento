@@ -239,5 +239,26 @@ describe("SICONFI Tools (5 ORDS tools)", () => {
     expect(
       (await executeTool("siconfi_dca", { id_ente: 1, an_exercicio: 2023 }, { apiConfig: API_CONFIG, cache })).ok
     ).toBe(false);
+
+    // Semestral RGF rejects period 3 before hitting fetch, and lowercase no_anexo normalizes prefix
+    const invalidSem = await executeTool(
+      "siconfi_rgf",
+      { id_ente: 3550308, an_exercicio: 2024, in_periodicidade: "S", nr_periodo: 3 },
+      { apiConfig: API_CONFIG, cache }
+    );
+    expect(invalidSem.ok).toBe(false);
+    expect(invalidSem.error).toContain("nr_periodo");
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(mockJsonResponse({ items: [{ anexo: "RREO-Anexo 01", cod_conta: "Rec", valor: 10 }] }))
+    );
+    const lowerAnexo = await executeTool(
+      "siconfi_rreo",
+      { id_ente: 3550308, an_exercicio: 2024, nr_periodo: 1, no_anexo: "rreo-anexo 01" },
+      { apiConfig: API_CONFIG, cache }
+    );
+    expect(lowerAnexo.ok).toBe(true);
+    expect(lowerAnexo.source?.url).toContain("no_anexo=RREO-Anexo+01");
   });
 });
