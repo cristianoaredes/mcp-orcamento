@@ -20,6 +20,6 @@ Consultas em `transferegov_emendas_especiais` podem filtrar por nome de parlamen
 
 ## 4. Encarregado / DPO (LGPD Art. 41) e Incidentes (LGPD Art. 48)
 
-- Operadores auto-hospedados podem configurar `MCP_DPO_CONTACT` no Cloudflare Worker para exposição automática em `GET /` (`privacy.dpo_contact`).
+- Operadores auto-hospedados podem configurar `MCP_DPO_CONTACT` no Cloudflare Worker para exposição automática em `GET /health` (`privacy.dpo_contact`).
 - Reportes ao projeto open source: [github.com/cristianoaredes/mcp-orcamento/issues](https://github.com/cristianoaredes/mcp-orcamento/issues) (sem dados pessoais sensíveis) ou GitHub Security Advisories para incidentes confidenciais.
 - Runbook interno de resposta a incidentes e notificação à ANPD: [`.archagents/10-runbooks.md`](.archagents/10-runbooks.md).

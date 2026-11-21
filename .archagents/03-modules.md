@@ -1,6 +1,6 @@
 # Mapa de módulos
 
-Base inicial: bootstrap `mcp-orcamento` (`0.1.0`, `SPC-0001`).
+Base atual: `TCK-0001` (`v0.1.0`, `SPC-0001`, implementado).
 
 - `lib/bin/` e `lib/adapters/`: entrypoint CLI (`mcp-orcamento.ts`), CLI (`cli.ts`), HTTP+SSE endurecido (`cli-http.ts`) e adaptador Cloudflare Worker (`cloudflare.ts`).
 - `lib/config/`: allowlists SSRF e resolução hierárquica de URLs (`index.ts`) e timeouts centralizados (`timeouts.ts`).
