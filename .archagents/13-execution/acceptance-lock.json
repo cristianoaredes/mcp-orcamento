@@ -1,0 +1,11 @@
+{
+  "TCK-0001": {
+    "content_digest": "sha256:fdc16574c4498e092d1e6286159b4211fd1510e656bf59e0668a524d36173062",
+    "criteria_digest": "sha256:b363a14b8b6644a27214a581cfff298bc6c449aa96f5b83fec5bae2a0e9d031a",
+    "head": "ceefb2606ab90109267f91e9edc93bdc7168e312",
+    "passes": true,
+    "tree": "feab184afd84d06ce6cc599cf4b66aefc23643bd",
+    "updated_at": "2026-11-21T18:40:11Z",
+    "updated_by": "criteria-check"
+  }
+}

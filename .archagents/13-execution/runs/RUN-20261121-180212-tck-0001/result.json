@@ -1,0 +1,222 @@
+{
+  "schema": "result/1",
+  "ticket": "TCK-0001",
+  "run_id": "RUN-20261121-180212-tck-0001",
+  "gerado_em": "2026-11-21T18:24:19Z",
+  "head": "4f36e2d5bd3e7df8fe93c64efa0b327346d7d0b7",
+  "status": "verifying",
+  "drive": null,
+  "estados": [
+    {
+      "n": 1,
+      "nome": "Pedido compreendido",
+      "atendido": true,
+      "evidencia": [
+        "ticket em 'verifying' (saiu de raw)",
+        "acceptance[]: 5 critério(s)",
+        "restrições registradas: nenhuma"
+      ],
+      "falta": [],
+      "nao_medido": [
+        "evento de rota: não liga a ticket nem a run (não medido)"
+      ]
+    },
+    {
+      "n": 2,
+      "nome": "Execução autorizada",
+      "atendido": null,
+      "evidencia": [
+        "o ticket passou por executing (status 'verifying')",
+        "nenhuma restrição read-only"
+      ],
+      "falta": [],
+      "nao_medido": [
+        "run sem drive (guiado à mão): o handoff do designed→executing não foi lido",
+        "budget.json ausente: sem teto de orçamento medido",
+        "max_attempts_total ausente no run: sem teto de tentativas medido"
+      ]
+    },
+    {
+      "n": 3,
+      "nome": "Tarefa executada",
+      "atendido": null,
+      "evidencia": [
+        "1 commit(s) citam o ticket"
+      ],
+      "falta": [],
+      "nao_medido": [
+        "actions.jsonl: sem passos de iteração do driver"
+      ]
+    },
+    {
+      "n": 4,
+      "nome": "Requisito comprovado",
+      "atendido": false,
+      "evidencia": [
+        "lock: passes true",
+        "lock fresh: o conteúdo é o que foi verificado"
+      ],
+      "falta": [
+        "VER exigido (ver_required) e nenhum vinculado ao ticket"
+      ],
+      "nao_medido": []
+    },
+    {
+      "n": 5,
+      "nome": "Publicação autorizada",
+      "atendido": null,
+      "evidencia": [
+        "nenhuma restrição no-publish"
+      ],
+      "falta": [],
+      "nao_medido": [
+        "run sem drive: a autonomia não foi registrada",
+        "sessão: as restrições da sessão não são conhecidas aqui (não medido)",
+        "URL de PR: não medida (sem rede)",
+        "autonomia concedida ao operador: não medida aqui (o nível do drive é o --level do ratchet, default L2)"
+      ]
+    }
+  ],
+  "implementado": null,
+  "verificado": false,
+  "publicado": {
+    "valor": null,
+    "motivo": "sem ref remota — nada a comparar"
+  },
+  "requisitos": [
+    {
+      "n": 1,
+      "check": "npm run build && npm run build:worker",
+      "expect": "",
+      "lock_passes": true,
+      "freshness": "fresh"
+    },
+    {
+      "n": 2,
+      "check": "node -e \"import('./build/lib/core/tools.js').then(m => { const names = m.TOOL_DEFINITIONS.map(t => t.name); if (names.length !== 8) process.exit(1); console.log('TOOLS_OK:' + names.length); })\"",
+      "expect": "TOOLS_OK:8",
+      "lock_passes": true,
+      "freshness": "fresh"
+    },
+    {
+      "n": 3,
+      "check": "node -e \"import('node:fs').then(fs => { const allow = JSON.parse(fs.readFileSync('.archagents/mcp-tool-allowlist.json','utf8')); const pkg = JSON.parse(fs.readFileSync('package.json','utf8')); if (pkg.version !== '0.1.0' || allow.entries.length !== 8) process.exit(1); console.log('ALLOWLIST_AND_VERSION_OK'); })\"",
+      "expect": "ALLOWLIST_AND_VERSION_OK",
+      "lock_passes": true,
+      "freshness": "fresh"
+    },
+    {
+      "n": 4,
+      "check": "npx vitest run --coverage",
+      "expect": "",
+      "lock_passes": true,
+      "freshness": "fresh"
+    },
+    {
+      "n": 5,
+      "check": "npm run test:transport",
+      "expect": "",
+      "lock_passes": true,
+      "freshness": "fresh"
+    }
+  ],
+  "arquivos_alterados": [
+    ".archagents/00-overview.md",
+    ".archagents/01-business-domain.md",
+    ".archagents/02-architecture.md",
+    ".archagents/03-modules.md",
+    ".archagents/04-data-model.md",
+    ".archagents/05-integrations.md",
+    ".archagents/06-infra-devops.md",
+    ".archagents/07-security-compliance.md",
+    ".archagents/08-conventions.md",
+    ".archagents/10-runbooks.md",
+    "PRIVACY.md",
+    "README.md",
+    "lib/adapters/cli-http.ts",
+    "lib/adapters/cli.ts",
+    "lib/adapters/cloudflare.ts",
+    "lib/bin/mcp-orcamento.ts",
+    "lib/config/index.ts",
+    "lib/config/timeouts.ts",
+    "lib/core/cache.ts",
+    "lib/core/http-client.ts",
+    "lib/core/mcp-server.ts",
+    "lib/core/registry.ts",
+    "lib/core/tool-schemas.ts",
+    "lib/core/tools.ts",
+    "lib/index.ts",
+    "lib/infrastructure/http/circuit-breaker.ts",
+    "lib/infrastructure/logger.ts",
+    "lib/infrastructure/rate-limiter.ts",
+    "lib/infrastructure/tracing.ts",
+    "lib/shared/agentic-guard.ts",
+    "lib/shared/compliance-notices.ts",
+    "lib/shared/errors.ts",
+    "lib/shared/log-redaction.ts",
+    "lib/shared/orcamento-schemas.ts",
+    "lib/shared/types/result.ts",
+    "lib/shared/utils/constants.ts",
+    "lib/shared/utils/timeout.ts",
+    "lib/tools/index.ts",
+    "lib/tools/siconfi.ts",
+    "lib/tools/tesouro.ts",
+    "lib/tools/transferegov.ts",
+    "lib/types/index.ts",
+    "lib/workers/auth.ts",
+    "lib/workers/oauth.ts",
+    "lib/workers/openapi.ts",
+    "lib/workers/rate-limit.ts",
+    "lib/workers/rest.ts",
+    "lib/workers/sse.ts",
+    "lib/workers/types.ts",
+    "lib/workers/worker.ts",
+    "test/integration/transports.mjs",
+    "test/unit/architecture-hygiene.test.ts",
+    "test/unit/cache-rate-limiter.test.ts",
+    "test/unit/cli-http-security.test.ts",
+    "test/unit/config-ssrf.test.ts",
+    "test/unit/http-client-circuit-breaker.test.ts",
+    "test/unit/mcp-server-handlers.test.ts",
+    "test/unit/observability-agentic-errors.test.ts",
+    "test/unit/siconfi-tools.test.ts",
+    "test/unit/tesouro-tools.test.ts",
+    "test/unit/tool-validation-allowlist.test.ts",
+    "test/unit/transferegov-tools.test.ts",
+    "test/unit/worker-auth-oauth-cors.test.ts",
+    "test/unit/worker-rest-cloudflare.test.ts",
+    "test/unit/worker-sse-kv.test.ts"
+  ],
+  "arquivos_alterados_total": 65,
+  "pendencias": [
+    "estado 4 (Requisito comprovado): VER exigido (ver_required) e nenhum vinculado ao ticket"
+  ],
+  "ver": null,
+  "consumo": {
+    "usd": null,
+    "cost_source": "unknown",
+    "iteracoes": null,
+    "tentativas_total": null,
+    "max_attempts_total": null,
+    "teto_usd": null,
+    "gasto_usd": null,
+    "unknown_spend": null,
+    "drives": null
+  },
+  "nao_medido": [
+    "drive: run sem drive (guiado à mão)",
+    "budget.json: ausente (sem teto de orçamento medido)",
+    "actions.jsonl: sem passos de iteração do driver",
+    "git: sem ref remota — nada a comparar",
+    "run.json: sem max_attempts_total",
+    "evento de rota: não liga a ticket nem a run (não medido)",
+    "run sem drive (guiado à mão): o handoff do designed→executing não foi lido",
+    "budget.json ausente: sem teto de orçamento medido",
+    "max_attempts_total ausente no run: sem teto de tentativas medido",
+    "run sem drive: a autonomia não foi registrada",
+    "sessão: as restrições da sessão não são conhecidas aqui (não medido)",
+    "URL de PR: não medida (sem rede)",
+    "autonomia concedida ao operador: não medida aqui (o nível do drive é o --level do ratchet, default L2)",
+    "publicado: sem ref remota — nada a comparar"
+  ]
+}

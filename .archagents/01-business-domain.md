@@ -1,6 +1,6 @@
 # Domínio e regras
 
-Base inicial: bootstrap `mcp-orcamento` (`0.1.0`, `SPC-0001`).
+Base atual: `TCK-0001` (`v0.1.0`, `SPC-0001`, implementado).
 
 O domínio cobre dados fiscais e orçamentários públicos brasileiros:
 - **SICONFI (STN ORDS):** `siconfi_entes` (cadastro de entes federativos com filtros obrigatórios), `siconfi_extrato_entregas` (entregas por ente e exercício), `siconfi_rreo` (RREO bimestral), `siconfi_rgf` (RGF quadrimestral/semestral por poder) e `siconfi_dca` (Declaração de Contas Anuais).
