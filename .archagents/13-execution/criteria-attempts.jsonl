@@ -1,2 +1,5 @@
 {"ts": "2026-11-21T18:23:42Z", "ticket": "TCK-0001", "verdict": "pass", "passed": 5, "total": 5}
 {"ts": "2026-11-21T18:40:11Z", "ticket": "TCK-0001", "verdict": "pass", "passed": 5, "total": 5}
+{"ts": "2026-11-21T19:39:48Z", "ticket": "TCK-0002", "verdict": "pass", "passed": 4, "total": 4}
+{"ts": "2026-11-21T19:48:20Z", "ticket": "TCK-0002", "verdict": "pass", "passed": 4, "total": 4}
+{"ts": "2026-11-21T19:50:27Z", "ticket": "TCK-0002", "verdict": "pass", "passed": 4, "total": 4}
