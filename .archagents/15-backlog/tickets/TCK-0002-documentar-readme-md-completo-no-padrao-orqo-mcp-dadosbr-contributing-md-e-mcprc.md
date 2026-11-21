@@ -5,8 +5,8 @@ title: "Documentar README.md completo no padrão Orqo/mcp-dadosbr, CONTRIBUTING.
 source: operator
 created_at: 2026-11-21T19:33:50Z
 created_by: ops
-updated_at: 2026-11-21T19:39:48Z
-status: verifying
+updated_at: 2026-11-21T19:50:27Z
+status: done
 severity: low
 category: docs
 effort: S
@@ -18,7 +18,8 @@ linked_designs:
   - DES-0002
 linked_runs:
   - RUN-20261121-193447-tck-0002
-linked_verifications: []
+linked_verifications:
+  - VER-20261121-194705-tck-0002
 linked_docs: []
 external_refs: []
 external_sync: []
@@ -49,7 +50,7 @@ Expandir o `README.md` do `@aredes.me/mcp-orcamento` (`v0.1.0`, `AGPL-3.0-only`)
 
 ## Falsificador
 
-Antes da execução, `README.md` possui apenas `76` linhas sem as seções obrigatórias do padrão Orqo/`mcp-dadosbr` (reprovando o critério `README_STRUCTURE_OK`), e `CONTRIBUTING.md` e `.mcprc.example.json` não existem no repositório.
+Antes da execução, `README.md:1-76` possui apenas `76` linhas sem as seções obrigatórias do padrão Orqo/`mcp-dadosbr` (reprovando o critério ``README_STRUCTURE_OK`` e ``npm pack --dry-run`` sem `.mcprc.example.json`), e `CONTRIBUTING.md` e `.mcprc.example.json` não existiam no repositório.
 
 ## Log de transicoes
 
@@ -58,3 +59,4 @@ Antes da execução, `README.md` possui apenas `76` linhas sem as seções obrig
 - 2026-11-21T19:34:46Z - **designed** - DES-0002 aprovado com escopo README.md, CONTRIBUTING.md, .mcprc.example.json e package.json
 - 2026-11-21T19:34:47Z - **executing** - Iniciar execucao live TCK-0002 sob DES-0002 na branch docs/TCK-0002-readme-orqo-standard
 - 2026-11-21T19:39:48Z - **verifying** - README.md expandido para 410 linhas no padrao Orqo/mcp-dadosbr, CONTRIBUTING.md e .mcprc.example.json criados, todos os 4 checks de aceite e transportes validados
+- 2026-11-21T19:50:27Z - **done** - P10 verified and judged for Orqo-standard README.md and CONTRIBUTING.md
