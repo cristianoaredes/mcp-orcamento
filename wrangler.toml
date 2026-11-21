@@ -1,0 +1,61 @@
+name = "mcp-orcamento-aredes"
+main = "build/lib/workers/worker.js"
+compatibility_date = "2024-09-27"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "mcp-orcamento-aredes-prod"
+
+[env.staging]
+name = "mcp-orcamento-aredes-staging"
+
+[env.staging.vars]
+MCP_TRANSPORT = "http"
+MCP_HTTP_PORT = "8787"
+MCP_CACHE_SIZE = "256"
+MCP_CACHE_TTL = "60000"
+
+[[env.staging.kv_namespaces]]
+binding = "MCP_CACHE"
+id = "00000000000000000000000000000012"
+
+[[env.staging.kv_namespaces]]
+binding = "MCP_KV"
+id = "00000000000000000000000000000012"
+
+[env.production.vars]
+MCP_TRANSPORT = "http"
+MCP_HTTP_PORT = "8787"
+MCP_CACHE_SIZE = "256"
+MCP_CACHE_TTL = "60000"
+
+[[env.production.kv_namespaces]]
+binding = "MCP_CACHE"
+id = "00000000000000000000000000000011"
+
+[[env.production.kv_namespaces]]
+binding = "MCP_KV"
+id = "00000000000000000000000000000011"
+
+# Environment variables for configuration (default)
+[vars]
+MCP_TRANSPORT = "http"
+MCP_HTTP_PORT = "8787"
+MCP_CACHE_SIZE = "256"
+MCP_CACHE_TTL = "60000"
+
+# Build configuration
+[build]
+command = "npm run build:worker"
+cwd = "."
+watch_dir = "lib"
+
+# Placeholder KV IDs — replace with real Cloudflare KV namespace IDs prior to wrangler deploy.
+[[kv_namespaces]]
+binding = "MCP_CACHE"
+id = "00000000000000000000000000000011"
+
+[[kv_namespaces]]
+binding = "MCP_KV"
+id = "00000000000000000000000000000011"
+preview_id = "00000000000000000000000000000012"

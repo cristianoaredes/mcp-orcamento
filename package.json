@@ -1,0 +1,79 @@
+{
+  "name": "@aredes.me/mcp-orcamento",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Brazilian federal and subnational public budget data (SICONFI, Transferegov, SADIPEM/PVL, Tesouro Transparente CKAN)",
+  "type": "module",
+  "module": "lib/index.ts",
+  "main": "build/lib/adapters/cli.js",
+  "bin": {
+    "mcp-orcamento": "build/lib/bin/mcp-orcamento.js"
+  },
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md",
+    "PRIVACY.md"
+  ],
+  "scripts": {
+    "dev": "tsx lib/adapters/cli.ts",
+    "build": "tsc",
+    "build:worker": "tsc -p tsconfig.worker.json",
+    "start": "node build/lib/adapters/cli.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:transport": "node test/integration/transports.mjs",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "brazil",
+    "orcamento-publico",
+    "siconfi",
+    "rreo",
+    "rgf",
+    "dca",
+    "transferegov",
+    "emendas-parlamentares",
+    "sadipem",
+    "tesouro-transparente",
+    "ckan",
+    "typescript",
+    "nodejs",
+    "cloudflare-workers"
+  ],
+  "author": "Cristiano Aredes <cristiano@aredes.me>",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cristianoaredes/mcp-orcamento.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cristianoaredes/mcp-orcamento/issues"
+  },
+  "homepage": "https://github.com/cristianoaredes/mcp-orcamento#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "chalk": "^5.6.2",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261120.1",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.12",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.166.0"
+  },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || ^26.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

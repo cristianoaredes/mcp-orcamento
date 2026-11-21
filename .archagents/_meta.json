@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-11-21T17:45:00Z",
+  "bootstrapped_at": "2026-11-21T17:45:00Z",
+  "generator": "codebase-ops-bootstrap",
+  "project_name": "mcp-orcamento",
+  "stack": "TypeScript / Node.js / MCP",
+  "autonomy_level": "L3",
+  "framework_version": "2.25.0",
+  "applied_migrations": [],
+  "learning_log": [],
+  "metrics": {
+    "total_tickets": 0,
+    "done_tickets": 0,
+    "archived_tickets": 0
+  }
+}

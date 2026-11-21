@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "server": "mcp-orcamento",
+  "updated_at": "2026-11-21T17:45:00Z",
+  "mcp_servers": {
+    "allowed": [
+      {
+        "server": "mcp-orcamento",
+        "rationale": "First-party read-only Brazilian public budget & fiscal MCP server with Zod runtime input validation, host-allowlisted upstream connectors, and PostgREST filter sanitization",
+        "approved_by": "cristiano",
+        "approved_at": "2026-11-21T14:33:08-03:00"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": "MCP-TOOL-01",
+      "name": "siconfi_entes",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Search Brazilian federal, state, and municipal entities registered in SICONFI with mandatory filter constraints.",
+      "rationale": "Read-only STN ORDS query validated by SiconfiEntesSchema.strict() requiring >=1 filter and capped at <=50 normalized results.",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-02",
+      "name": "siconfi_extrato_entregas",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query SICONFI statement submission history (extrato de entregas) by IBGE entity code and reference year.",
+      "rationale": "Read-only STN ORDS query validated by SiconfiExtratoEntregasSchema.strict() with positive integer id_ente, bounded year (2015..2030), and limit <= 100.",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-03",
+      "name": "siconfi_rreo",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query SICONFI Summary Budget Execution Report (RREO) accounts with annex discovery and paginated filtering.",
+      "rationale": "Read-only STN ORDS query validated by SiconfiRreoSchema.strict() with bimester bounds (1..6) and pagination (limit <= 50).",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-04",
+      "name": "siconfi_rgf",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query SICONFI Fiscal Management Report (RGF) accounts by periodicity, branch/power, and annex with pagination.",
+      "rationale": "Read-only STN ORDS query validated by SiconfiRgfSchema.strict() with enum constraints on periodicity/branch and pagination (limit <= 50).",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-05",
+      "name": "siconfi_dca",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query SICONFI Annual Accounts Declaration (DCA) accounting lines with annex discovery and paginated filtering.",
+      "rationale": "Read-only STN ORDS query validated by SiconfiDcaSchema.strict() with bounded year and pagination (limit <= 50).",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-06",
+      "name": "transferegov_emendas_especiais",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query Transferegov Special Transfers (emendas Pix / art. 166-A) across action plans, executors, commitments, payments, and management reports.",
+      "rationale": "Read-only MGI PostgREST query validated by TransferegovEmendasEspeciaisSchema.strict() with PostgREST operator stripping, bounded limit <= 50, and LGPD homonym notice.",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-07",
+      "name": "transferegov_fundo_a_fundo_ted",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query Transferegov Fundo a Fundo and TED (Termo de Execucao Descentralizada) resources.",
+      "rationale": "Read-only MGI PostgREST query validated by TransferegovFundoFundoTedSchema.strict() enforcing modalidade/recurso pairs, PostgREST operator stripping, and bounded limit <= 50.",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    },
+    {
+      "id": "MCP-TOOL-08",
+      "name": "tesouro_operacoes_credito_ckan",
+      "risk_level": "low",
+      "destructive": false,
+      "requires_approval": false,
+      "description": "Query subnational credit operations (SADIPEM/PVL by UF) and search Tesouro Transparente CKAN open datasets.",
+      "rationale": "Read-only STN ORDS/CKAN query validated by TesouroOperacoesCreditoCkanSchema.strict() requiring 2-letter UF for PVL and bounded limit <= 50.",
+      "network_access": "allowlisted-https",
+      "api_key_env": null
+    }
+  ]
+}
