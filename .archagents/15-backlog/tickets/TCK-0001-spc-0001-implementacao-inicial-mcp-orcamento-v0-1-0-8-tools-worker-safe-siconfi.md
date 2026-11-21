@@ -5,8 +5,8 @@ title: "[SPC-0001] Implementação inicial mcp-orcamento v0.1.0 (8 tools Worker-
 source: spec
 created_at: 2026-11-21T17:59:50Z
 created_by: ops
-updated_at: 2026-11-21T18:01:36Z
-status: designed
+updated_at: 2026-11-21T18:23:42Z
+status: verifying
 severity: medium
 category: feature
 effort: M
@@ -16,7 +16,8 @@ business_impact: ""
 linked_findings: []
 linked_designs:
   - DES-0001
-linked_runs: []
+linked_runs:
+  - RUN-20261121-180212-tck-0001
 linked_verifications: []
 linked_docs:
   - .archagents/12-inception/specs/SPC-0001-catalogo-inicial-v010-orcamento.md
@@ -51,3 +52,5 @@ Antes da execução, `lib/` e `test/` ainda não existem no repositório, fazend
 - 2026-11-21T17:59:50Z - **raw** - criado via scripts/ops/ticket/create.py.
 - 2026-11-21T18:00:31Z - **triaged** - Triagem automática de spec compilada SPC-0001 (ceremony: full, security_sensitive: true)
 - 2026-11-21T18:01:36Z - **designed** - DES-0001 aprovado com Threat Model T1..T6 e escopo completo para TCK-0001
+- 2026-11-21T18:02:13Z - **executing** - Iniciar execução live TCK-0001 sob DES-0001 na branch feat/TCK-0001-v0.1.0-catalog
+- 2026-11-21T18:23:42Z - **verifying** - Implementação completa v0.1.0 (8 tools, build/worker, 14 unit suites / 50 tests, 91.68% stmts / 81.12% branches / 92.43% funcs / 92.25% lines, stdio + HTTP/SSE transport ok); pronto para verificação P10 independente
