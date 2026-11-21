@@ -13,7 +13,8 @@
     "README.md",
     "LICENSE",
     "NOTICE.md",
-    "PRIVACY.md"
+    "PRIVACY.md",
+    ".mcprc.example.json"
   ],
   "scripts": {
     "dev": "tsx lib/adapters/cli.ts",

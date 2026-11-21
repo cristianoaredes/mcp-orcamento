@@ -1,0 +1,19 @@
+{
+  "_comment": "MCP Orçamento Configuration Example — copy to .mcprc.json (see lib/config/index.ts and SSRF allowlists in lib/shared/utils/constants.ts)",
+  "_defaults": {
+    "tesouroOrds": "https://apidatalake.tesouro.gov.br/ords/",
+    "transferegov": "https://api.transferegov.gestao.gov.br/",
+    "tesouroCkan": "https://www.tesourotransparente.gov.br/ckan/api/3/action/"
+  },
+  "apiUrls": {
+    "tesouroOrds": "https://apidatalake.tesouro.gov.br/ords/",
+    "transferegov": "https://api.transferegov.gestao.gov.br/",
+    "tesouroCkan": "https://www.tesourotransparente.gov.br/ckan/api/3/action/"
+  },
+  "auth": {
+    "headers": {
+      "X-API-Key": "your-api-key",
+      "Authorization": "Bearer your-token"
+    }
+  }
+}
