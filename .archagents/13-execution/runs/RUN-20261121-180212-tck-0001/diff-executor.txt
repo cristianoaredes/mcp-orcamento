@@ -87,7 +87,7 @@ index 64f2cce..9a80a7c 100644
  - **CI (`.github/workflows/ci.yml`):** matriz Node.js `22.x`, `24.x`, `26.x`, build Node (`tsc`) e Worker (`tsc -p tsconfig.worker.json`), cobertura Vitest (`85/85/80/85`), smoke de transportes `stdio` e `HTTP/SSE`, `npm audit --omit=dev --audit-level=high` e limite de linhas em `lib/core/mcp-server.ts` (`<= 180`).
  - **Cloudflare Workers (`wrangler.toml`):** ambientes `production` (`mcp-orcamento-aredes-prod`) e `staging` (`mcp-orcamento-aredes-staging`) com IDs KV placeholder para preenchimento antes de deploy.
 diff --git a/.archagents/07-security-compliance.md b/.archagents/07-security-compliance.md
-index dbb5442..6b30515 100644
+index dbb5442..7a75823 100644
 --- a/.archagents/07-security-compliance.md
 +++ b/.archagents/07-security-compliance.md
 @@ -1,11 +1,11 @@
@@ -101,7 +101,7 @@ index dbb5442..6b30515 100644
  - **Anti-injeção PostgREST:** filtros textuais (`nome_parlamentar`, `sigla_unidade`) removem `[,()*%\\]` antes de montar `ilike.*clean*`.
  - **Validação agêntica (`SC-9`):** todas as 8 ferramentas usam Zod `.strict()` sem `api_key`, allowlist versionada em `.archagents/mcp-tool-allowlist.json` (`_capabilities.json` com `enabled: false`, `tool_count: 8`), sanitização `sanitizeUntrustedText`, aviso `UNTRUSTED_EXTERNAL_DATA_NOTICE`, teto `serializeBoundedToolOutput` e `lgpd_notice` (`HOMONYM_HUMAN_REVIEW_NOTICE`) em resultados com nomes parlamentares.
 -- **Auth & CORS:** `MCP_API_KEY` fail-closed fora de loopback no CLI HTTP e em rotas privadas do Worker; OAuth desabilitado fail-closed (`501`).
-+- **Auth, DNS Rebinding & CORS:** `cli-http.ts` faz bind padrão em `127.0.0.1`, valida cabeçalho `Host`, aplica allowlist estrita de `Origin` e exige `MCP_API_KEY`/`API_KEY` (comparação em tempo constante) quando configurada; no Worker (`lib/workers/auth.ts`), `MCP_REQUIRE_AUTH=true` opera fail-closed (`401`) se nenhuma chave estiver provisionada e OAuth não configurado retorna `501`.
++- **Auth, DNS Rebinding & CORS:** `cli-http.ts` faz bind padrão em `127.0.0.1`, exige `MCP_API_KEY` fail-closed fora de loopback (com comparação `SHA-256` + `timingSafeEqual`), valida sintaxe de porta em `Host` e `Origin` estrito; no Worker (`lib/workers/auth.ts`), `MCP_REQUIRE_AUTH=true` opera fail-closed (`401`) se nenhuma chave estiver provisionada e OAuth não configurado retorna `501`.
  
  ## Fontes
  
@@ -139,6 +139,82 @@ index fe5c3a8..3e104d2 100644
  
  ## Resposta a Incidentes e Notificação à ANPD (LGPD Art. 48)
  
+diff --git a/.archagents/_meta.json b/.archagents/_meta.json
+index 1e96442..87d1793 100644
+--- a/.archagents/_meta.json
++++ b/.archagents/_meta.json
+@@ -10,8 +10,68 @@
+   "applied_migrations": [],
+   "learning_log": [],
+   "metrics": {
+-    "total_tickets": 0,
++    "total_tickets": 1,
+     "done_tickets": 0,
+-    "archived_tickets": 0
+-  }
++    "archived_tickets": 0,
++    "avg_cycle_time": null,
++    "avg_cycle_time_coverage": {
++      "measured": 0,
++      "total": 0,
++      "ratio": 0.0
++    },
++    "success_rate": 0.0,
++    "success_rate_coverage": {
++      "measured": 0,
++      "total": 0,
++      "discarded_non_outcome": 0,
++      "ratio": 0.0,
++      "source": "learning_log + taxonomia TCK-0820"
++    },
++    "status_breakdown": {
++      "verifying": 1
++    }
++  },
++  "active_runs": [],
++  "malformed_runs": [],
++  "noncanonical_runs": [],
++  "zombie_runs": [],
++  "zombie_runs_coverage": "ok",
++  "health_score": 20.0,
++  "health_score_coverage": {
++    "formula": "ad-hoc: 0.4*backlog + 0.4*recent_success + 0.2*drift - zombie_debt_penalty (cap 20, ver TCK-2693)",
++    "approved_alternative": "lib/health_rubric (SPC-0086) — zero chamadores; trocar exige ADR",
++    "components": {
++      "backlog_health": {
++        "value": 0.0,
++        "weight": 0.4,
++        "measured": 0,
++        "total": 1,
++        "ratio": 0.0
++      },
++      "recent_success": {
++        "value": 0.0,
++        "weight": 0.4,
++        "measured": 0,
++        "total": 0,
++        "discarded_non_outcome": 0,
++        "ratio": 0.0,
++        "source": "learning_log (últimos 10) + taxonomia TCK-0820"
++      },
++      "drift_component": {
++        "value": 100,
++        "weight": 0.2,
++        "drift_entries": 0,
++        "source": "count_drift_entries()"
++      }
++    },
++    "zombie_debt_penalty": {
++      "value": 0.0,
++      "zombie_runs": 0,
++      "cap": 20.0,
++      "rate_per_run": 1.0,
++      "coverage": "ok",
++      "source": "zombie-run-scan.py (TCK-1447/TCK-2477) via .archagents/.zombie-runs-baseline.json"
++    }
++  },
++  "last_updated": "2026-11-21T18:24:44.055616Z"
+ }
 diff --git a/PRIVACY.md b/PRIVACY.md
 index dea92c8..196e122 100644
 --- a/PRIVACY.md
@@ -236,16 +312,17 @@ index 5ddb378..d534c25 100644
 +```
 diff --git a/lib/adapters/cli-http.ts b/lib/adapters/cli-http.ts
 new file mode 100644
-index 0000000..b63dc9e
+index 0000000..33d486c
 --- /dev/null
 +++ b/lib/adapters/cli-http.ts
-@@ -0,0 +1,466 @@
+@@ -0,0 +1,512 @@
 +/**
 + * Hardened Node Express 5 HTTP/SSE & Streamable HTTP MCP transport adapter.
 + * Features loopback default binding, DNS rebinding Host validation, strict CORS,
 + * timing-safe API key auth, security headers, 100KB body limit, and sliding-window rate limiting.
 + */
 +
++import { createHash, timingSafeEqual } from "node:crypto";
 +import http from "node:http";
 +import type { AddressInfo } from "node:net";
 +import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
@@ -269,9 +346,20 @@ index 0000000..b63dc9e
 +} from "../infrastructure/tracing.js";
 +import { SERVER } from "../shared/utils/constants.js";
 +import type { ApiConfig, Cache, MCPRequest, ServerConfig } from "../types/index.js";
-+import { constantTimeEqual } from "../workers/auth.js";
 +
 +const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
++
++export function isLoopbackHost(host: string): boolean {
++  if (typeof host !== "string") return false;
++  return LOOPBACK_HOSTS.has(host.trim().toLowerCase());
++}
++
++export function isValidApiKey(provided: string, expected: string): boolean {
++  if (!provided || !expected) return false;
++  const providedDigest = createHash("sha256").update(provided, "utf8").digest();
++  const expectedDigest = createHash("sha256").update(expected, "utf8").digest();
++  return timingSafeEqual(providedDigest, expectedDigest);
++}
 +
 +export interface HttpServerOptions {
 +  apiConfig: ApiConfig;
@@ -291,14 +379,29 @@ index 0000000..b63dc9e
 +  close: () => Promise<void>;
 +}
 +
-+function normalizeHostHeader(rawHost: string): string {
++function normalizeHostHeader(rawHost: string): string | null {
 +  const trimmed = rawHost.trim().toLowerCase();
-+  if (trimmed.startsWith("[")) {
-+    const endIdx = trimmed.indexOf("]");
-+    return endIdx >= 0 ? trimmed.slice(0, endIdx + 1) : trimmed;
++  if (!trimmed || /[\s/@\\?#]/.test(trimmed)) {
++    return null;
 +  }
-+  const colonIdx = trimmed.indexOf(":");
-+  return colonIdx >= 0 ? trimmed.slice(0, colonIdx) : trimmed;
++  if (trimmed.startsWith("[")) {
++    const match = /^\[([a-f0-9:.]+)\](?::(\d{1,5}))?$/.exec(trimmed);
++    if (!match) return null;
++    if (match[2] !== undefined) {
++      const port = Number(match[2]);
++      if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
++    }
++    return `[${match[1]}]`;
++  }
++  const firstColon = trimmed.indexOf(":");
++  if (firstColon === -1) return trimmed;
++  if (firstColon !== trimmed.lastIndexOf(":")) return null;
++  const hostname = trimmed.slice(0, firstColon);
++  const portStr = trimmed.slice(firstColon + 1);
++  if (!hostname || !/^\d{1,5}$/.test(portStr)) return null;
++  const port = Number(portStr);
++  if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
++  return hostname;
 +}
 +
 +function isOriginAllowed(origin: string, explicitAllowlist?: string[]): boolean {
@@ -307,10 +410,18 @@ index 0000000..b63dc9e
 +  }
 +  try {
 +    const parsed = new URL(origin);
-+    return (
-+      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
-+      LOOPBACK_HOSTS.has(parsed.hostname.toLowerCase())
-+    );
++    if (
++      (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
++      parsed.username ||
++      parsed.password ||
++      parsed.pathname !== "/" ||
++      parsed.search !== "" ||
++      parsed.hash !== "" ||
++      origin.endsWith("/")
++    ) {
++      return false;
++    }
++    return LOOPBACK_HOSTS.has(parsed.hostname.toLowerCase());
 +  } catch {
 +    return false;
 +  }
@@ -363,6 +474,11 @@ index 0000000..b63dc9e
 +  const configuredApiKey =
 +    options.apiKey ?? process.env.MCP_API_KEY ?? process.env.API_KEY;
 +  const bindHost = (options.serverConfig.httpHost || "127.0.0.1").trim();
++  if (!isLoopbackHost(bindHost) && (!configuredApiKey || configuredApiKey.trim().length === 0)) {
++    throw new Error(
++      `Refusing to bind HTTP MCP server to non-loopback host "${bindHost}" without MCP_API_KEY`
++    );
++  }
 +  const explicitAllowedHosts = options.allowedHosts ?? parseListEnv("MCP_ALLOWED_HOSTS");
 +  const explicitAllowedOrigins =
 +    options.allowedOrigins ??
@@ -403,8 +519,14 @@ index 0000000..b63dc9e
 +    }
 +
 +    const hostname = normalizeHostHeader(rawHost);
++    if (!hostname) {
++      res.status(400).json({ error: "Invalid Host header" });
++      return;
++    }
 +    if (explicitAllowedHosts && explicitAllowedHosts.length > 0) {
-+      const allowedNormalized = explicitAllowedHosts.map((h) => normalizeHostHeader(h));
++      const allowedNormalized = explicitAllowedHosts
++        .map((h) => normalizeHostHeader(h))
++        .filter((h): h is string => h !== null);
 +      if (!allowedNormalized.includes(hostname)) {
 +        res.status(403).json({ error: "Forbidden Host header" });
 +        return;
@@ -494,7 +616,7 @@ index 0000000..b63dc9e
 +      res.status(401).json({ error: "Unauthorized: missing API key" });
 +      return;
 +    }
-+    if (!constantTimeEqual(token, configuredApiKey)) {
++    if (!configuredApiKey || !isValidApiKey(token, configuredApiKey)) {
 +      res.status(403).json({ error: "Forbidden: invalid API key" });
 +      return;
 +    }
@@ -3837,10 +3959,10 @@ index 0000000..b5b0d88
 +}
 diff --git a/lib/shared/orcamento-schemas.ts b/lib/shared/orcamento-schemas.ts
 new file mode 100644
-index 0000000..98fc6e2
+index 0000000..95bf3ff
 --- /dev/null
 +++ b/lib/shared/orcamento-schemas.ts
-@@ -0,0 +1,278 @@
+@@ -0,0 +1,287 @@
 +/**
 + * Runtime Zod schemas and Web-standard sanitization helpers for the 8 Budget/Fiscal tools.
 + * Zero `node:*` imports for Cloudflare Workers parity.
@@ -3992,7 +4114,16 @@ index 0000000..98fc6e2
 +    page: z.number().int().min(1).max(100).optional().default(1),
 +    limit: z.number().int().min(1).max(50).optional().default(30),
 +  })
-+  .strict();
++  .strict()
++  .superRefine((val, ctx) => {
++    if (val.in_periodicidade === "S" && val.nr_periodo > 2) {
++      ctx.addIssue({
++        code: z.ZodIssueCode.custom,
++        path: ["nr_periodo"],
++        message: "nr_periodo deve ser 1 ou 2 quando in_periodicidade='S'",
++      });
++    }
++  });
 +
 +export const SiconfiDcaSchema = z
 +  .object({
@@ -4676,10 +4807,10 @@ index 0000000..a63f2f6
 +} from "../core/registry.js";
 diff --git a/lib/tools/siconfi.ts b/lib/tools/siconfi.ts
 new file mode 100644
-index 0000000..da20944
+index 0000000..e7eaae5
 --- /dev/null
 +++ b/lib/tools/siconfi.ts
-@@ -0,0 +1,497 @@
+@@ -0,0 +1,494 @@
 +/**
 + * SICONFI tools (Tesouro Nacional ORDS API):
 + * - siconfi_entes
@@ -4976,17 +5107,18 @@ index 0000000..da20944
 +  };
 +}
 +
-+function isExactOrdsAnexoPrefix(noAnexo: string | undefined, prefix: string): boolean {
-+  return typeof noAnexo === "string" && noAnexo.toUpperCase().startsWith(prefix);
++function normalizeOrdsAnexoPrefix(noAnexo: string | undefined, prefix: string): string | undefined {
++  if (typeof noAnexo !== "string") return undefined;
++  const trimmed = noAnexo.trim();
++  if (!trimmed.toUpperCase().startsWith(prefix)) return undefined;
++  return `${prefix}${trimmed.slice(prefix.length).replace(/^anexo\b/i, "Anexo")}`;
 +}
 +
 +export async function handleSiconfiRreo(
 +  args: SiconfiRreoArgs,
 +  context: ToolExecutionContext
 +): Promise<LookupResult> {
-+  const upstreamAnexo = isExactOrdsAnexoPrefix(args.no_anexo, "RREO-")
-+    ? args.no_anexo
-+    : undefined;
++  const upstreamAnexo = normalizeOrdsAnexoPrefix(args.no_anexo, "RREO-");
 +  const url = buildOrdsUrl(context.apiConfig.tesouroOrdsBaseUrl, "siconfi/tt/rreo", {
 +    an_exercicio: args.an_exercicio,
 +    nr_periodo: args.nr_periodo,
@@ -5034,9 +5166,7 @@ index 0000000..da20944
 +  args: SiconfiRgfArgs,
 +  context: ToolExecutionContext
 +): Promise<LookupResult> {
-+  const upstreamAnexo = isExactOrdsAnexoPrefix(args.no_anexo, "RGF-")
-+    ? args.no_anexo
-+    : undefined;
++  const upstreamAnexo = normalizeOrdsAnexoPrefix(args.no_anexo, "RGF-");
 +  const url = buildOrdsUrl(context.apiConfig.tesouroOrdsBaseUrl, "siconfi/tt/rgf", {
 +    an_exercicio: args.an_exercicio,
 +    in_periodicidade: args.in_periodicidade,
@@ -5088,9 +5218,7 @@ index 0000000..da20944
 +  args: SiconfiDcaArgs,
 +  context: ToolExecutionContext
 +): Promise<LookupResult> {
-+  const upstreamAnexo = isExactOrdsAnexoPrefix(args.no_anexo, "DCA-")
-+    ? args.no_anexo
-+    : undefined;
++  const upstreamAnexo = normalizeOrdsAnexoPrefix(args.no_anexo, "DCA-");
 +  const url = buildOrdsUrl(context.apiConfig.tesouroOrdsBaseUrl, "siconfi/tt/dca", {
 +    an_exercicio: args.an_exercicio,
 +    id_ente: args.id_ente,
@@ -6945,10 +7073,10 @@ index 0000000..d9d988e
 +}
 diff --git a/lib/workers/worker.ts b/lib/workers/worker.ts
 new file mode 100644
-index 0000000..d13808c
+index 0000000..a96c105
 --- /dev/null
 +++ b/lib/workers/worker.ts
-@@ -0,0 +1,215 @@
+@@ -0,0 +1,226 @@
 +/**
 + * Cloudflare Worker HTTP fetch entrypoint routing /, /health, /mcp, /sse, /openapi.json,
 + * OAuth metadata/endpoints, and /tools/{toolName}.
@@ -7128,7 +7256,18 @@ index 0000000..d13808c
 +    }
 +
 +    if (pathname.startsWith("/tools/")) {
-+      const toolName = decodeURIComponent(pathname.slice("/tools/".length));
++      let toolName: string;
++      try {
++        toolName = decodeURIComponent(pathname.slice("/tools/".length));
++      } catch {
++        return new Response(
++          JSON.stringify({ ok: false, error: "Invalid URL encoding in tool route" }),
++          {
++            status: 400,
++            headers: { "Content-Type": "application/json", ...commonHeaders, ...rlHeaders },
++          }
++        );
++      }
 +      if (!toolName || toolName.includes("/")) {
 +        return new Response(JSON.stringify({ ok: false, error: "Invalid tool route" }), {
 +          status: 404,
@@ -7570,14 +7709,14 @@ index 0000000..3a0ca69
 +});
 diff --git a/test/unit/cli-http-security.test.ts b/test/unit/cli-http-security.test.ts
 new file mode 100644
-index 0000000..245247c
+index 0000000..5017539
 --- /dev/null
 +++ b/test/unit/cli-http-security.test.ts
-@@ -0,0 +1,348 @@
+@@ -0,0 +1,405 @@
 +import http from "node:http";
 +import { afterEach, describe, expect, it } from "vitest";
 +import { parseCliArgs } from "../../lib/adapters/cli.js";
-+import { startHttpServer, type RunningHttpServer } from "../../lib/adapters/cli-http.js";
++import { createHttpApp, startHttpServer, type RunningHttpServer } from "../../lib/adapters/cli-http.js";
 +import { MemoryCache } from "../../lib/core/cache.js";
 +import type { ApiConfig, ServerConfig } from "../../lib/types/index.js";
 +
@@ -7920,6 +8059,63 @@ index 0000000..245247c
 +      req.on("error", reject);
 +    });
 +    expect(sseEndpoint).toContain("/messages?sessionId=");
++  });
++
++  it("enforces fail-closed MCP_API_KEY outside loopback and strict Host/Origin syntax", async () => {
++    const cache = new MemoryCache(16, 60_000, 0);
++    caches.push(cache);
++
++    expect(() =>
++      createHttpApp({
++        apiConfig: API_CONFIG,
++        serverConfig: { ...BASE_SERVER_CONFIG, httpHost: "0.0.0.0" },
++        cache,
++      })
++    ).toThrow(/non-loopback host/);
++
++    const created = createHttpApp({
++      apiConfig: API_CONFIG,
++      serverConfig: { ...BASE_SERVER_CONFIG, httpHost: "0.0.0.0" },
++      cache,
++      apiKey: "non-loopback-secret",
++    });
++    await created.cleanup();
++
++    const running = await startHttpServer({
++      apiConfig: API_CONFIG,
++      serverConfig: BASE_SERVER_CONFIG,
++      cache,
++      apiKey: "sec-key-2",
++    });
++    servers.push(running);
++
++    const badHostSyntax = await rawHttpRequest({
++      port: running.port,
++      path: "/health",
++      headers: { Host: "localhost:notaport" },
++    });
++    expect(badHostSyntax.status).toBe(400);
++
++    const credOrigin = `${"http://"}demo-user${":"}demo-token@localhost:5173`;
++    const badCredOrigin = await rawHttpRequest({
++      port: running.port,
++      path: "/health",
++      headers: {
++        Host: `127.0.0.1:${running.port}`,
++        Origin: credOrigin,
++      },
++    });
++    expect(badCredOrigin.status).toBe(403);
++
++    const badPathOrigin = await rawHttpRequest({
++      port: running.port,
++      path: "/health",
++      headers: {
++        Host: `127.0.0.1:${running.port}`,
++        Origin: "http://localhost:5173/evil",
++      },
++    });
++    expect(badPathOrigin.status).toBe(403);
 +  });
 +});
 diff --git a/test/unit/config-ssrf.test.ts b/test/unit/config-ssrf.test.ts
@@ -8560,10 +8756,10 @@ index 0000000..9edaa1e
 +});
 diff --git a/test/unit/siconfi-tools.test.ts b/test/unit/siconfi-tools.test.ts
 new file mode 100644
-index 0000000..b859eb4
+index 0000000..a6e3b46
 --- /dev/null
 +++ b/test/unit/siconfi-tools.test.ts
-@@ -0,0 +1,243 @@
+@@ -0,0 +1,264 @@
 +import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 +import { MemoryCache } from "../../lib/core/cache.js";
 +import { resetCircuitBreakers } from "../../lib/core/http-client.js";
@@ -8805,6 +9001,27 @@ index 0000000..b859eb4
 +    expect(
 +      (await executeTool("siconfi_dca", { id_ente: 1, an_exercicio: 2023 }, { apiConfig: API_CONFIG, cache })).ok
 +    ).toBe(false);
++
++    // Semestral RGF rejects period 3 before hitting fetch, and lowercase no_anexo normalizes prefix
++    const invalidSem = await executeTool(
++      "siconfi_rgf",
++      { id_ente: 3550308, an_exercicio: 2024, in_periodicidade: "S", nr_periodo: 3 },
++      { apiConfig: API_CONFIG, cache }
++    );
++    expect(invalidSem.ok).toBe(false);
++    expect(invalidSem.error).toContain("nr_periodo");
++
++    vi.stubGlobal(
++      "fetch",
++      vi.fn().mockResolvedValue(mockJsonResponse({ items: [{ anexo: "RREO-Anexo 01", cod_conta: "Rec", valor: 10 }] }))
++    );
++    const lowerAnexo = await executeTool(
++      "siconfi_rreo",
++      { id_ente: 3550308, an_exercicio: 2024, nr_periodo: 1, no_anexo: "rreo-anexo 01" },
++      { apiConfig: API_CONFIG, cache }
++    );
++    expect(lowerAnexo.ok).toBe(true);
++    expect(lowerAnexo.source?.url).toContain("no_anexo=RREO-Anexo+01");
 +  });
 +});
 diff --git a/test/unit/tesouro-tools.test.ts b/test/unit/tesouro-tools.test.ts
@@ -9616,10 +9833,10 @@ index 0000000..0de6b86
 +});
 diff --git a/test/unit/worker-rest-cloudflare.test.ts b/test/unit/worker-rest-cloudflare.test.ts
 new file mode 100644
-index 0000000..cc542f9
+index 0000000..d445fac
 --- /dev/null
 +++ b/test/unit/worker-rest-cloudflare.test.ts
-@@ -0,0 +1,255 @@
+@@ -0,0 +1,261 @@
 +import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 +import {
 +  buildWorkerCache,
@@ -9861,6 +10078,12 @@ index 0000000..cc542f9
 +      {}
 +    );
 +    expect(nestedTool.status).toBe(404);
++
++    const malformedEncoding = await handleWorkerFetch(
++      new Request("https://worker.test/tools/%E0%A4%A", { method: "POST", body: "{}" }),
++      {}
++    );
++    expect(malformedEncoding.status).toBe(400);
 +
 +    const unknownRoute = await handleWorkerFetch(
 +      new Request("https://worker.test/nonexistent", { method: "GET" }),

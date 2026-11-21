@@ -4,12 +4,13 @@ run_id: RUN-20261121-180212-tck-0001
 ticket: TCK-0001
 design: DES-0001
 start_time: 2026-11-21T18:02:12Z
-end_time: 2026-11-21T18:23:42Z
+end_time: 2026-11-21T18:35:06Z
 environment: dev
 mode: live
 operator: ops
 commits:
   - 4f36e2d5bd3e7df8fe93c64efa0b327346d7d0b7
+  - 83799e0c5bfed5b6fb94af4dc876c4262ca2d8a3
 files_modified:
   - README.md
   - PRIVACY.md
@@ -78,8 +79,8 @@ files_modified:
   - test/unit/worker-sse-kv.test.ts
 test_result:
   status: pass
-  summary: "14/14 unit suites (50/50 tests) + stdio/HTTP-SSE integration passed; coverage 91.68% stmts / 81.12% branches / 92.43% funcs / 92.25% lines"
-  details: "Dual tsc builds, verify-tool-allowlist (0 violations), criteria-check (5/5 pass), check-scope (out_of_scope: []), and secret-scan clean"
+  summary: "14/14 unit suites (51/51 tests) + stdio/HTTP-SSE integration passed; coverage 91.26% stmts / 81.01% branches / 92.54% funcs / 92.12% lines"
+  details: "Dual tsc builds, T5 CLI HTTP non-loopback fail-closed & SHA-256 timingSafeEqual hardening, URI decode 400, RGF semestral refinement, verify-tool-allowlist (0 violations), check-scope (out_of_scope: []), and secret-scan clean"
 ---
 # RUN-20261121-180212-tck-0001 - TCK-0001
 
@@ -136,7 +137,7 @@ _O relatório descreve o instante em que foi gerado; quem decide é o ticket, o 
 | `npm run build && npm run build:worker` | exit 0 | exit 0 (`tsc` & `tsc -p tsconfig.worker.json`) | pass |
 | `node -e "...TOOL_DEFINITIONS..."` | `TOOLS_OK:8` | `TOOLS_OK:8` | pass |
 | `node -e "...allowlist & version..."` | `ALLOWLIST_AND_VERSION_OK` | `ALLOWLIST_AND_VERSION_OK` | pass |
-| `npx vitest run --coverage` | exit 0 (>=85/85/80/85) | 14 files / 50 tests pass (`91.68%` stmts, `81.12%` branches, `92.43%` funcs, `92.25%` lines) | pass |
+| `npx vitest run --coverage` | exit 0 (>=85/85/80/85) | 14 files / 51 tests pass (`91.26%` stmts, `81.01%` branches, `92.54%` funcs, `92.12%` lines) | pass |
 | `npm run test:transport` | exit 0 | `STDIO_TRANSPORT_OK` & `HTTP_SSE_TRANSPORT_OK` | pass |
 | `verify-tool-allowlist.py --json` | `violations_count: 0` | `violations_count: 0` | pass |
 | `check-scope.py --ticket TCK-0001 --base main` | `out_of_scope: []` | `out_of_scope: []`, `scope_tampered: []` | pass |
