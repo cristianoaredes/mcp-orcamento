@@ -7,5 +7,14 @@
     "tree": "feab184afd84d06ce6cc599cf4b66aefc23643bd",
     "updated_at": "2026-11-21T18:40:11Z",
     "updated_by": "criteria-check"
+  },
+  "TCK-0002": {
+    "content_digest": "sha256:ee176f9b5c623d5d1b3c76705be0850cd1a3f9543f427c074192366b848f5769",
+    "criteria_digest": "sha256:139d412c1e1ef5a55a758b7154f870bae5add26b5e958499658e1455b699ea1c",
+    "head": "bd2e56ad6e12aa4525417010f8f774a4906d79a1",
+    "passes": true,
+    "tree": "a7634da7caef6dc3b3e30b747bb6302e480e8b05",
+    "updated_at": "2026-11-21T19:39:48Z",
+    "updated_by": "criteria-check"
   }
 }
