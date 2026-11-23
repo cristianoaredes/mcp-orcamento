@@ -3,7 +3,7 @@
 **Orçamento público, LRF e transferências federais na conversa com IA. Com fonte, proveniência e limites declarados.**
 
 [![by Orqo](https://img.shields.io/badge/by-Orqo-0b1215?style=flat)](https://orqo.pro/)
-[![npm](https://img.shields.io/badge/npm-not%20published%20(v0.1.0)-64748b?style=flat)](#instalação-e-configuração)
+[![npm](https://img.shields.io/npm/v/%40aredes.me%2Fmcp-orcamento?label=npm&color=0f766e&style=flat)](https://www.npmjs.com/package/@aredes.me/mcp-orcamento)
 [![License: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-1e293b?style=flat)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-22.12%2B%20%7C%2024%20%7C%2026-334155?style=flat)](package.json)
 [![Tools](https://img.shields.io/badge/tools-8%20%7C%20zero--key%20Worker--safe-0f766e?style=flat)](#catálogo-completo-das-8-ferramentas)
@@ -119,13 +119,13 @@ O **MCP Orçamento** foi desenhado para compor investigações integradas com ou
 
 ## Instalação e configuração
 
-> **Status de distribuição (`2026-11-23`):** O pacote `@aredes.me/mcp-orcamento` está na versão `0.1.0` na branch `main` e **ainda não foi publicado no npm** (nem em GitHub Releases). Até a primeira release publicada no npm, utilize a **instalação a partir do código-fonte (seção 2)**.
+> **Distribuição (`2026-11-23`):** O pacote [`@aredes.me/mcp-orcamento`](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) (`0.1.0`) está publicado no **npm** e pronto para uso via `npx` (release/tag `v0.1.0` no GitHub pendente do merge deste PR).
 
 **Pré-requisito:** Node.js **22.12 ou posterior na linha 22**, **24** ou **26** (`engines.node` em [`package.json`](package.json#L82-L84)).
 
-### 1. Início rápido via npm *(disponível após publicação)*
+### 1. Início rápido via npm (recomendado)
 
-Após a publicação no registro npm, em clientes que utilizam `mcpServers` (Claude Desktop, Cursor, Windsurf, Claude Code e compatíveis), você poderá usar:
+Em clientes compatíveis com `mcpServers` (Claude Desktop, Cursor, Windsurf, Claude Code e equivalentes), adicione:
 
 ```json
 {
@@ -138,28 +138,28 @@ Após a publicação no registro npm, em clientes que utilizam `mcpServers` (Cla
 }
 ```
 
-Para compor o ecossistema `@aredes.me/*` no mesmo host MCP usando builds locais até a publicação dos pacotes `orcamento` e `tse`:
+Para compor o ecossistema `@aredes.me/*` completo no mesmo host MCP:
 
 ```json
 {
   "mcpServers": {
     "orcamento": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
     },
     "dadosbr": {
       "command": "npx",
       "args": ["-y", "@aredes.me/mcp-dadosbr"]
     },
     "tse": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-tse/build/lib/bin/mcp-tse.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-tse"]
     }
   }
 }
 ```
 
-### 2. A partir do código-fonte (recomendado no momento · desenvolvimento, auditoria ou customização)
+### 2. A partir do código-fonte (desenvolvimento, auditoria ou customização)
 
 ```bash
 git clone https://github.com/cristianoaredes/mcp-orcamento.git
@@ -328,7 +328,7 @@ Conheça mais sobre a camada de governança em **[orqo.pro](https://orqo.pro/)**
 ## Perguntas diretas
 
 **Como consultar o SICONFI ou Emendas Pix no Claude Desktop, Claude Code ou Cursor?**
-Clone o repositório e compile o servidor (`npm ci && npm run build`), já que o pacote ainda não foi publicado no npm, e adicione `"command": "node"` apontando para `build/lib/bin/mcp-orcamento.js` no arquivo `mcpServers` do cliente. Depois, basta pedir na conversa em português para buscar entes no SICONFI, checar anexos de RREO/RGF/DCA ou listar repasses do Transferegov. Veja todos os modelos prontos em [`docs/MCP_CLIENT_INTEGRATION.md`](docs/MCP_CLIENT_INTEGRATION.md).
+Adicione `"command": "npx", "args": ["-y", "@aredes.me/mcp-orcamento"]` na seção `mcpServers` do cliente (ou compile localmente com `npm ci && npm run build` apontando `"node"` para `build/lib/bin/mcp-orcamento.js`). Depois, basta pedir na conversa em português para buscar entes no SICONFI, checar anexos de RREO/RGF/DCA ou listar repasses do Transferegov. Veja todos os modelos prontos em [`docs/MCP_CLIENT_INTEGRATION.md`](docs/MCP_CLIENT_INTEGRATION.md).
 
 **Preciso de alguma chave de API ou cadastro para usar o MCP Orçamento?**
 Não. Todas as 8 ferramentas (`siconfi_entes`, `siconfi_extrato_entregas`, `siconfi_rreo`, `siconfi_rgf`, `siconfi_dca`, `transferegov_emendas_especiais`, `transferegov_fundo_a_fundo_ted` e `tesouro_operacoes_credito_ckan`) consultam APIs públicas abertas do governo brasileiro sem cadastro nem token. `MCP_API_KEY` é opcional e serve apenas para proteger o seu próprio endpoint HTTP/Worker quando exposto em rede.
@@ -402,7 +402,7 @@ O MCP Orçamento realiza consultas **somente leitura sob demanda** a fontes púb
 - **MGI / Transferegov PostgREST (2 tools):** `transferegov_emendas_especiais` (*Emendas Pix* / Art. 166-A across action plans, executors, commitments, payments, and management reports) and `transferegov_fundo_a_fundo_ted` (`fundoafundo/*` and `ted/*`), with strict `modalidade`/`recurso` validation, PostgREST operator stripping (`[,()*%\\]`), and LGPD Art. 20 homonym human-review notices.
 - **STN / SADIPEM & Tesouro Transparente CKAN (1 tool):** `tesouro_operacoes_credito_ckan` for subnational credit operations (`operacoes_credito_pvl`, requiring 2-letter `uf`) and open dataset/resource discovery (`ckan_datasets`).
 - **Dual execution perimeter:** Node.js CLI (`stdio`, hardened Express 5 Streamable HTTP `/mcp`, and legacy `GET /sse` + `POST /messages` with fail-closed `MCP_API_KEY` outside loopback) and stateless Cloudflare Worker (`POST /mcp`, `GET|POST /sse`, generic allowlisted `POST /tools/{toolName}`, `GET /openapi.json`, and `GET /health`). Both runtimes share zero-`node:*` core/tool/worker layers (`lib/core/mcp-server.ts` is `147` lines, `<= 180`), per-origin circuit breakers, SSRF host allowlists, and `stderr`-only redacted JSON logging.
-- **Distribution & Quick start (Node.js 22.12+, 24, or 26):** `@aredes.me/mcp-orcamento` is currently `0.1.0` on `main` and **not yet published on npm**. Build from source (`git clone https://github.com/cristianoaredes/mcp-orcamento.git && npm ci && npm run build && npm run build:worker`), run `npm run test:coverage && npm run test:transport`, and point `mcpServers.orcamento` to `build/lib/bin/mcp-orcamento.js` (or `npx -y @aredes.me/mcp-orcamento` once published). See [`docs/`](docs/README.md), [`CHANGELOG.md`](CHANGELOG.md), [`llms.txt`](llms.txt), [`.mcprc.example.json`](.mcprc.example.json), and [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **Distribution & Quick start (Node.js 22.12+, 24, or 26):** `@aredes.me/mcp-orcamento` (`0.1.0`) is published on [npm](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) — configure `mcpServers.orcamento` with `"command": "npx", "args": ["-y", "@aredes.me/mcp-orcamento"]`. To build from source instead (`git clone https://github.com/cristianoaredes/mcp-orcamento.git && npm ci && npm run build && npm run build:worker`), run `npm run test:coverage && npm run test:transport` and point to `build/lib/bin/mcp-orcamento.js`. See [`docs/`](docs/README.md), [`CHANGELOG.md`](CHANGELOG.md), [`llms.txt`](llms.txt), [`.mcprc.example.json`](.mcprc.example.json), and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - **Explicit boundaries:** does not query discontinued Transferegov `/maisbrasil` or `/siconv` (`404`) or slow `/obrasgov` (`>10s`), rejects un-allowlisted upstream hosts (SSRF protection), strips PostgREST injection characters, does not serve `ui://` HTML MCP Apps in `v0.1.0` (JSON text only), does not guarantee live government API uptime, and requires human review on nominal parliamentary matches (LGPD Art. 20).
 - **Governed in the open:** built from day one with **[Codebase OPS by Orqo](https://orqo.pro/en/)** — specifications, designs, ADRs, execution runs, and independent P10 verification live in [`.archagents/`](.archagents/README.md).
 - **License & Privacy:** [GNU AGPL-3.0-only](LICENSE) (network copyleft; third-party notices in [NOTICE.md](NOTICE.md)) and LGPD transparency policy in [PRIVACY.md](PRIVACY.md).

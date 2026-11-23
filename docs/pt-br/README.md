@@ -15,9 +15,9 @@ Bem-vindo à documentação em português brasileiro do **MCP Orçamento** (`@ar
 3. **[Exemplos de Uso (`USAGE_EXAMPLES.md`)](../USAGE_EXAMPLES.md)** — Casos reais com RREO, RGF, DCA, Emendas Pix, Fundo a Fundo, TED, PVL, CKAN e cruzamento com `mcp-dadosbr` e `mcp-tse`.
 4. **[Índice geral (`docs/README.md`)](../README.md)** e **[README principal](../../README.md)**.
 
-## Compilação Local e Testes
+## Instalação via npm ou Compilação Local
 
-> **Aviso de publicação:** `@aredes.me/mcp-orcamento` ainda não foi publicado no npm (`0.1.0` em `main`). Clone e compile localmente até a primeira release.
+> **Distribuição (`2026-11-23`):** [`@aredes.me/mcp-orcamento`](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) (`0.1.0`) está publicado no **npm** (`npx -y @aredes.me/mcp-orcamento`). Para compilação local e testes a partir do código-fonte:
 
 ```bash
 git clone https://github.com/cristianoaredes/mcp-orcamento.git

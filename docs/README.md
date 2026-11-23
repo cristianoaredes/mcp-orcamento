@@ -18,9 +18,13 @@
 
 ## Início Rápido
 
-> **Status de distribuição (`2026-11-23`):** O pacote `@aredes.me/mcp-orcamento` está na versão `0.1.0` na branch `main` e ainda **não foi publicado no npm**. Até a primeira release, utilize o build a partir do código-fonte:
+> **Distribuição (`2026-11-23`):** O pacote [`@aredes.me/mcp-orcamento`](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) (`0.1.0`) está publicado no registro **npm**. Execute diretamente com `npx -y @aredes.me/mcp-orcamento` ou compile localmente a partir do código-fonte:
 
 ```bash
+# Execução direta via npm
+npx -y @aredes.me/mcp-orcamento
+
+# Ou build a partir do código-fonte
 git clone https://github.com/cristianoaredes/mcp-orcamento.git
 cd mcp-orcamento
 npm ci
@@ -31,10 +35,8 @@ printf '%s\n%s\n%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"cli","version":"1.0"}}}' \
   '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"siconfi_entes","arguments":{"uf":"MG","capital_only":true}}}' \
-  | node build/lib/bin/mcp-orcamento.js
+  | npx -y @aredes.me/mcp-orcamento
 ```
-
-*Após a primeira publicação no registro npm*, o servidor poderá ser executado diretamente via `npx -y @aredes.me/mcp-orcamento`.
 
 ## Catálogo Resumido das 8 Ferramentas (`v0.1.0`)
 

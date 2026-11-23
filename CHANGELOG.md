@@ -4,7 +4,7 @@ All notable changes to `@aredes.me/mcp-orcamento` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Status de distribuição (`2026-11-23`):** A versão `0.1.0` está implementada na branch `main` (ainda sem release publicada no GitHub nem pacote publicado no registro npm).
+> **Distribuição (`2026-11-23`):** O pacote [`@aredes.me/mcp-orcamento`](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) (`0.1.0`) está publicado no registro npm (`latest: 0.1.0`; tag GitHub Release `v0.1.0` pendente do merge do PR #1).
 
 ## [Unreleased]
 
@@ -17,7 +17,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
-- (`TCK-0003`) Auditoria completa do `README.md` contra o código em `lib/`: adicionado aviso explícito de pacote npm ainda não publicado, precisão de esquemas Zod (`siconfi_entes`, `siconfi_rgf`, formatação de CNPJ no Transferegov vs SICONFI, `cod_ibge` em `tesouro_operacoes_credito_ckan`), distinção entre `MCP_HTTP_TIMEOUT`, `MCP_ORDS_TIMEOUT` e `MCP_API_TIMEOUT`, `CORS_ALLOWED_ORIGINS` vs `MCP_CORS_ALLOWED_ORIGINS` e seção FAQ expandida para SEO/GEO.
+- (`TCK-0003`) Auditoria completa do `README.md` contra o código em `lib/` e alinhamento pós-publicação `v0.1.0` no npm: precisão de esquemas Zod (`siconfi_entes`, `siconfi_rgf`, formatação de CNPJ no Transferegov vs SICONFI, `cod_ibge` em `tesouro_operacoes_credito_ckan`), distinção entre `MCP_HTTP_TIMEOUT`, `MCP_ORDS_TIMEOUT` e `MCP_API_TIMEOUT`, `CORS_ALLOWED_ORIGINS` vs `MCP_CORS_ALLOWED_ORIGINS` e seção FAQ expandida para SEO/GEO.
 - (`TCK-0003`) Revisados `description` e `keywords` em `package.json` e topics no GitHub (`emendas-parlamentares`, `lrf`, `dados-abertos`).
 
 ## [0.1.0] - 2026-11-21

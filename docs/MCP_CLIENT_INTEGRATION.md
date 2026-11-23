@@ -2,7 +2,7 @@
 
 _Como conectar o `@aredes.me/mcp-orcamento` ao Claude Desktop, Claude Code, Cursor, Windsurf, VS Code (Cline), Continue.dev, MCP Inspector e clientes HTTP/REST._
 
-> **Importante — Status no npm (`2026-11-23`):** O pacote `@aredes.me/mcp-orcamento` está na versão `0.1.0` em código e **ainda não foi publicado no npm**. Enquanto não houver a primeira release no registro npm, compile localmente (`git clone ... && npm ci && npm run build`) e aponte os clientes para `build/lib/bin/mcp-orcamento.js`. Os exemplos com `npx -y @aredes.me/mcp-orcamento` passam a funcionar automaticamente após a publicação no npm.
+> **Distribuição (`2026-11-23`):** O pacote [`@aredes.me/mcp-orcamento`](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) (`0.1.0`) está publicado no **npm**. Utilize `npx -y @aredes.me/mcp-orcamento` nos clientes abaixo (ou compile localmente com `npm ci && npm run build` apontando para `build/lib/bin/mcp-orcamento.js`).
 
 ## Índice
 
@@ -43,7 +43,25 @@ Edite o arquivo de configuração do Claude Desktop:
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
-### Usando build local (recomendado até publicação no npm)
+### Via npm (`npx`, recomendado)
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"],
+      "env": {
+        "MCP_ORDS_TIMEOUT": "20000",
+        "MCP_HTTP_TIMEOUT": "10000",
+        "LOG_LEVEL": "warn"
+      }
+    }
+  }
+}
+```
+
+### Usando build local (desenvolvimento/auditoria)
 
 ```json
 {
@@ -56,19 +74,6 @@ Edite o arquivo de configuração do Claude Desktop:
         "MCP_HTTP_TIMEOUT": "10000",
         "LOG_LEVEL": "warn"
       }
-    }
-  }
-}
-```
-
-### Após publicação no npm
-
-```json
-{
-  "mcpServers": {
-    "orcamento": {
-      "command": "npx",
-      "args": ["-y", "@aredes.me/mcp-orcamento"]
     }
   }
 }
@@ -247,22 +252,22 @@ Combine múltiplos servidores da família `@aredes.me/*` no mesmo host (`claude_
 {
   "mcpServers": {
     "orcamento": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
     },
     "dadosbr": {
       "command": "npx",
       "args": ["-y", "@aredes.me/mcp-dadosbr"]
     },
     "tse": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-tse/build/lib/bin/mcp-tse.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-tse"]
     }
   }
 }
 ```
 
-> Nota: `@aredes.me/mcp-dadosbr` possui versão `0.6.0` publicada no npm (`0.7.0` em `main`); `@aredes.me/mcp-orcamento` e `@aredes.me/mcp-tse` ainda exigem build local até a publicação inicial no registro npm.
+> Todos os pacotes acima (`@aredes.me/mcp-orcamento@0.1.0`, `@aredes.me/mcp-dadosbr@0.7.0` e `@aredes.me/mcp-tse@0.1.0`) estão publicados no registro npm (ou use `node build/lib/bin/*.js` para execução direta a partir do código-fonte).
 
 ---
 
