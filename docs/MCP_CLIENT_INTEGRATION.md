@@ -85,10 +85,10 @@ Reinicie o Claude Desktop e confirme que as 8 ferramentas (`siconfi_*`, `transfe
 
 ## Claude Code
 
-Registre via CLI `claude mcp add` usando o build local:
+Registre via CLI `claude mcp add` usando `npx` (ou use `node /caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js` para build local):
 
 ```bash
-claude mcp add orcamento -- node /caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js
+claude mcp add orcamento -- npx -y @aredes.me/mcp-orcamento
 ```
 
 Ou adicione no `.mcp.json` do projeto:
@@ -97,8 +97,8 @@ Ou adicione no `.mcp.json` do projeto:
 {
   "mcpServers": {
     "orcamento": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
     }
   }
 }
@@ -114,8 +114,8 @@ Em **Settings > Cursor Settings > MCP > Add new global MCP server** (ou `.cursor
 {
   "mcpServers": {
     "orcamento": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"],
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"],
       "env": {
         "MCP_ORDS_TIMEOUT": "15000"
       }
@@ -134,8 +134,8 @@ Em `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "orcamento": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
     }
   }
 }
@@ -152,8 +152,8 @@ Em `~/.codeium/windsurf/mcp_config.json`:
   "servers": {
     "orcamento": {
       "type": "stdio",
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"]
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
     }
   }
 }
@@ -166,8 +166,8 @@ No arquivo `cline_mcp_settings.json`:
 {
   "mcpServers": {
     "orcamento": {
-      "command": "node",
-      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"],
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"],
       "disabled": false
     }
   }
@@ -187,8 +187,8 @@ Em `~/.continue/config.json`:
       {
         "transport": {
           "type": "stdio",
-          "command": "node",
-          "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"]
+          "command": "npx",
+          "args": ["-y", "@aredes.me/mcp-orcamento"]
         }
       }
     ]
@@ -203,7 +203,7 @@ Em `~/.continue/config.json`:
 Inspecione schemas, descrições e execute chamadas ao vivo no navegador:
 
 ```bash
-npx @modelcontextprotocol/inspector node build/lib/bin/mcp-orcamento.js
+npx @modelcontextprotocol/inspector npx -y @aredes.me/mcp-orcamento
 ```
 
 ---
@@ -213,7 +213,9 @@ npx @modelcontextprotocol/inspector node build/lib/bin/mcp-orcamento.js
 Suba o servidor HTTP local:
 
 ```bash
-MCP_TRANSPORT=http MCP_HTTP_PORT=3000 node build/lib/bin/mcp-orcamento.js
+MCP_TRANSPORT=http MCP_HTTP_PORT=3000 npx -y @aredes.me/mcp-orcamento
+# Ou a partir do build local:
+# MCP_TRANSPORT=http MCP_HTTP_PORT=3000 node build/lib/bin/mcp-orcamento.js
 ```
 
 Verifique saúde e liste ferramentas via Streamable HTTP (`POST /mcp`) ou REST no Cloudflare Worker (`POST /tools/{toolName}`):
@@ -273,6 +275,6 @@ Combine múltiplos servidores da família `@aredes.me/*` no mesmo host (`claude_
 
 ## Troubleshooting
 
-- **Cliente reporta falha de JSON-RPC na inicialização `stdio`:** confirme que está apontando para `build/lib/bin/mcp-orcamento.js` após `npm run build` e usando Node.js `22.12+`, `24` ou `26`.
+- **Cliente reporta falha de JSON-RPC na inicialização `stdio`:** confirme que está usando Node.js `22.12+`, `24` ou `26` com `npx -y @aredes.me/mcp-orcamento` (ou apontando para `build/lib/bin/mcp-orcamento.js` após `npm run build` no build local).
 - **Erro HTTP `403 Host header not allowed` em conexão HTTP:** ao acessar por hostname diferente de `localhost`/`127.0.0.1`, informe `MCP_ALLOWED_HOSTS=seu-host.local`.
 - **Erro `401 Unauthorized` no Worker/HTTP:** envie `Authorization: Bearer <MCP_API_KEY>` ou `X-API-Key: <MCP_API_KEY>`.

@@ -184,16 +184,16 @@ Configure seu cliente apontando para o caminho absoluto do binário compilado:
 ### 3. Modo servidor HTTP/SSE local
 
 ```bash
-# Uso local em loopback (127.0.0.1:3000) a partir do build local
-MCP_TRANSPORT=http MCP_HTTP_PORT=3000 node build/lib/bin/mcp-orcamento.js
+# Uso local em loopback (127.0.0.1:3000) via npm
+MCP_TRANSPORT=http MCP_HTTP_PORT=3000 npx -y @aredes.me/mcp-orcamento
 # ou via CLI flag:
-node build/lib/bin/mcp-orcamento.js --http --port 3000
+npx -y @aredes.me/mcp-orcamento --http --port 3000
 
 # Exposição em rede / Docker / VPS (MCP_API_KEY obrigatória fora de loopback)
-MCP_TRANSPORT=http MCP_HTTP_HOST=0.0.0.0 MCP_API_KEY="<sua-chave-secreta>" node build/lib/bin/mcp-orcamento.js
+MCP_TRANSPORT=http MCP_HTTP_HOST=0.0.0.0 MCP_API_KEY="<sua-chave-secreta>" npx -y @aredes.me/mcp-orcamento
 
-# Após publicação no npm, o mesmo comando poderá ser executado via:
-# MCP_TRANSPORT=http MCP_HTTP_PORT=3000 npx -y @aredes.me/mcp-orcamento
+# Alternativa a partir do build local:
+# MCP_TRANSPORT=http MCP_HTTP_PORT=3000 node build/lib/bin/mcp-orcamento.js
 ```
 
 O servidor expõe Streamable HTTP (`ALL /mcp`), SSE legado (`GET /sse` + `POST /messages?sessionId=<id>`) e telemetria em `GET /health`, com rate limit padrão de **100 requisições por minuto por IP** (configurável via `MCP_RATE_LIMIT`, [`lib/adapters/cli-http.ts`](lib/adapters/cli-http.ts#L148-L154)).
@@ -298,7 +298,7 @@ flowchart LR
 
 Esta seção evita expectativas equivocadas antes da adoção.
 
-- **Não possui pacote publicado no npm nesta data (`2026-11-23`).** A versão `0.1.0` está disponível na branch `main` e requer build local (`npm ci && npm run build`) até a publicação oficial da primeira release.
+- **Não requer chaves de API externas nem configuração para leitura via `stdio`.** Exposição HTTP fora de loopback exige `MCP_API_KEY`, e o build local (`npm ci && npm run build`) permanece opcional para desenvolvimento e auditoria.
 - **Não consulta módulos Transferegov descontinuados ou lentos na `v0.1.0`.** Rotas `/maisbrasil` e `/siconv` (HTTP `404` na origem) e `/obrasgov` (latência `>10s`) foram excluídas intencionalmente da `v0.1.0` e documentadas em `api_scope_note` ([`lib/tools/transferegov.ts`](lib/tools/transferegov.ts#L31-L32)).
 - **Não aceita operadores PostgREST brutos em buscas textuais.** Caracteres `[,()*%\\]` são removidos em `nome_parlamentar` e `sigla_unidade`, e combinações incompatíveis de `modalidade`/`recurso` são rejeitadas no schema antes de qualquer chamada de rede.
 - **Não despeja relatórios contábeis inteiros sem paginação ou teto de saída.** Listas de `siconfi_entes`, `siconfi_rreo`, `siconfi_rgf`, `siconfi_dca` e `tesouro_operacoes_credito_ckan` são filtradas e paginadas server-side (`<= 50` itens por página; `<= 100` em `siconfi_extrato_entregas`) e limitadas por `serializeBoundedToolOutput` (`100_000` chars padrão) para caber no isolate de `128 MB` do Worker e na janela de contexto do modelo.
