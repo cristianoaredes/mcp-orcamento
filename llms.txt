@@ -1,0 +1,45 @@
+# MCP Orçamento by Orqo (@aredes.me/mcp-orcamento)
+
+> Open-source Model Context Protocol (MCP) server built by Orqo providing 8 read-only, zero-API-key tools to query Brazilian federal and subnational public budgets, LRF fiscal execution reports (SICONFI RREO, RGF, DCA), federal transfers (Transferegov Emendas Pix, Fundo a Fundo, TED), subnational credit requests (SADIPEM PVL), and Tesouro Transparente CKAN datasets.
+
+- Version (`main` & npm `latest`): `0.1.0` (`https://www.npmjs.com/package/@aredes.me/mcp-orcamento`)
+- License: `AGPL-3.0-only`
+- Runtime targets: Node.js (`>=22.12 || 24 || 26`, `stdio` / Streamable HTTP `/mcp` / SSE `/sse`) and Cloudflare Workers (`POST /mcp`, `/sse`, REST `POST /tools/{toolName}`, `GET /openapi.json`, `GET /health`)
+- Distribution (`2026-11-23`): Published on npm as `@aredes.me/mcp-orcamento@0.1.0` (`npx -y @aredes.me/mcp-orcamento`); GitHub Release tag `v0.1.0` pending PR #1 merge.
+
+## Ferramentas
+
+- `siconfi_entes`: Lista entes federativos brasileiros (`cod_ibge`, `cnpj`, `uf`, `esfera`, `populacao`, `capital`) com filtros obrigatórios na API SICONFI ORDS.
+- `siconfi_extrato_entregas`: Consulta o histórico oficial de entregas de demonstrativos fiscais (`RREO`, `RGF`, `DCA`, `MSC`) por `id_ente` e `an_referencia`.
+- `siconfi_rreo`: Consulta contas paginadas (`<= 50` itens) do Relatório Resumido da Execução Orçamentária (`RREO` / `RREO Simplificado`) por bimestre (`1..6`), com descoberta de `anexos_disponiveis` e `filtro_conta`.
+- `siconfi_rgf`: Consulta contas paginadas (`<= 50` itens) do Relatório de Gestão Fiscal (`RGF` / `RGF Simplificado`) por periodicidade (`Q` 1..3 / `S` 1..2), poder (`E|L|J|M|D`), anexo e conta.
+- `siconfi_dca`: Consulta contas paginadas (`<= 50` itens) da Declaração de Contas Anuais (`DCA` — balanço patrimonial, variações e execução) com `anexos_disponiveis` e `filtro_conta`.
+- `transferegov_emendas_especiais`: Consulta Transferências Especiais (`Emendas Pix`, Art. 166-A) no Transferegov PostgREST (`plano_acao_especial`, `executor_especial`, `empenho_especial`, `ordem_pagamento_ordem_bancaria_especial`, `relatorio_gestao_novo_especial`) com aviso LGPD Art. 20.
+- `transferegov_fundo_a_fundo_ted`: Consulta repasses Fundo a Fundo (`fundoafundo/*`) e Termos de Execução Descentralizada (`ted/*`) no Transferegov PostgREST com validação estrita de par `modalidade`/`recurso`.
+- `tesouro_operacoes_credito_ckan`: Consulta Pedidos de Verificação de Limites e Condições (`operacoes_credito_pvl` no SADIPEM por `uf`) ou pesquisa pacotes/recursos abertos (`ckan_datasets`) no Tesouro Transparente CKAN.
+
+## Fontes oficiais
+
+- **STN / SICONFI ORDS:** `https://apidatalake.tesouro.gov.br/ords/siconfi/tt/*`
+- **STN / SADIPEM ORDS (PVL):** `https://apidatalake.tesouro.gov.br/ords/sadipem/tt/pvl`
+- **MGI / Transferegov PostgREST:** `https://api.transferegov.gestao.gov.br/transferenciasespeciais/*`, `/fundoafundo/*`, `/ted/*`
+- **Tesouro Transparente CKAN:** `https://www.tesourotransparente.gov.br/ckan/api/3/action/package_search`
+
+## Docs
+
+- [README](https://github.com/cristianoaredes/mcp-orcamento/blob/main/README.md): Visão geral, catálogo das 8 ferramentas, instalação e FAQ.
+- [Docs Index](https://github.com/cristianoaredes/mcp-orcamento/blob/main/docs/README.md): Índice completo da documentação bilíngue.
+- [Guia PT-BR](https://github.com/cristianoaredes/mcp-orcamento/blob/main/docs/pt-br/README.md): Guia rápido para desenvolvedores brasileiros.
+- [Configuration Guide](https://github.com/cristianoaredes/mcp-orcamento/blob/main/docs/CONFIGURATION.md): Variáveis de ambiente, `.mcprc.json`, allowlists SSRF, timeouts e Cloudflare Workers.
+- [MCP Client Integration](https://github.com/cristianoaredes/mcp-orcamento/blob/main/docs/MCP_CLIENT_INTEGRATION.md): Integração com Claude Desktop, Claude Code, Cursor, Windsurf, VS Code, Continue e clientes HTTP/Worker.
+- [Usage Examples](https://github.com/cristianoaredes/mcp-orcamento/blob/main/docs/USAGE_EXAMPLES.md): Prompts, chamadas JSON-RPC e saídas reais das 8 ferramentas + cruzamentos com `@aredes.me/mcp-dadosbr` e `@aredes.me/mcp-tse`.
+- [Changelog](https://github.com/cristianoaredes/mcp-orcamento/blob/main/CHANGELOG.md): Histórico de alterações da versão `0.1.0`.
+- [Privacy & LGPD](https://github.com/cristianoaredes/mcp-orcamento/blob/main/PRIVACY.md): Bases legais e minimização de dados.
+
+## Limites
+
+- Somente leitura (`read-only`): não realiza lançamentos contábeis, não submete demonstrativos ao SICONFI e não altera dados oficiais.
+- Sem painéis HTML `ui://` (MCP Apps) na `v0.1.0`: todas as 8 ferramentas retornam JSON estruturado em texto (`ListResources` retorna `[]`).
+- Rotas legadas ou lentas do Transferegov (`/maisbrasil`, `/siconv`, `/obrasgov`) foram omitidas intencionalmente na `v0.1.0` (`api_scope_note`).
+- Toda saída é limitada por paginação (`<= 50` / `<= 100`) e pelo teto `MCP_MAX_TOOL_OUTPUT_CHARS` (padrão `100000` caracteres).
+- Consultas nominais exigem revisão humana contra homônimos (`lgpd_notice`, LGPD Art. 20); erros ou timeouts das APIs oficiais falham explicitamente sem dados fictícios nem cache de erro.

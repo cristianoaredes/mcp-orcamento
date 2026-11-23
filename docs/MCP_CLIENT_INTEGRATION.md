@@ -1,0 +1,280 @@
+# Guia de Integração em Clientes MCP — MCP Orçamento
+
+_Como conectar o `@aredes.me/mcp-orcamento` ao Claude Desktop, Claude Code, Cursor, Windsurf, VS Code (Cline), Continue.dev, MCP Inspector e clientes HTTP/REST._
+
+> **Distribuição (`2026-11-23`):** O pacote [`@aredes.me/mcp-orcamento`](https://www.npmjs.com/package/@aredes.me/mcp-orcamento) (`0.1.0`) está publicado no **npm**. Utilize `npx -y @aredes.me/mcp-orcamento` nos clientes abaixo (ou compile localmente com `npm ci && npm run build` apontando para `build/lib/bin/mcp-orcamento.js`).
+
+## Índice
+
+- [Pré-requisito de Compilação Local](#pré-requisito-de-compilação-local)
+- [Claude Desktop](#claude-desktop)
+- [Claude Code](#claude-code)
+- [Cursor](#cursor)
+- [Windsurf](#windsurf)
+- [VS Code (Cline / MCP nativo)](#vs-code-cline--mcp-nativo)
+- [Continue.dev](#continuedev)
+- [MCP Inspector](#mcp-inspector)
+- [Cliente HTTP / Streamable HTTP / Cloudflare Worker](#cliente-http--streamable-http--cloudflare-worker)
+- [Ecossistema Integrado (`orcamento` + `dadosbr` + `tse`)](#ecossistema-integrado-orcamento--dadosbr--tse)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Pré-requisito de Compilação Local
+
+Requer **Node.js `>= 22.12`, `24` ou `26`**:
+
+```bash
+git clone https://github.com/cristianoaredes/mcp-orcamento.git
+cd mcp-orcamento
+npm ci
+npm run build && npm run build:worker
+```
+
+Anote o caminho absoluto resultante, por exemplo:
+`/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js`
+
+---
+
+## Claude Desktop
+
+Edite o arquivo de configuração do Claude Desktop:
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+### Via npm (`npx`, recomendado)
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"],
+      "env": {
+        "MCP_ORDS_TIMEOUT": "20000",
+        "MCP_HTTP_TIMEOUT": "10000",
+        "LOG_LEVEL": "warn"
+      }
+    }
+  }
+}
+```
+
+### Usando build local (desenvolvimento/auditoria)
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "node",
+      "args": ["/caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js"],
+      "env": {
+        "MCP_ORDS_TIMEOUT": "20000",
+        "MCP_HTTP_TIMEOUT": "10000",
+        "LOG_LEVEL": "warn"
+      }
+    }
+  }
+}
+```
+
+Reinicie o Claude Desktop e confirme que as 8 ferramentas (`siconfi_*`, `transferegov_*`, `tesouro_operacoes_credito_ckan`) aparecem no menu de conectores.
+
+---
+
+## Claude Code
+
+Registre via CLI `claude mcp add` usando `npx` (ou use `node /caminho/absoluto/mcp-orcamento/build/lib/bin/mcp-orcamento.js` para build local):
+
+```bash
+claude mcp add orcamento -- npx -y @aredes.me/mcp-orcamento
+```
+
+Ou adicione no `.mcp.json` do projeto:
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
+    }
+  }
+}
+```
+
+---
+
+## Cursor
+
+Em **Settings > Cursor Settings > MCP > Add new global MCP server** (ou `.cursor/mcp.json` no projeto):
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"],
+      "env": {
+        "MCP_ORDS_TIMEOUT": "15000"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Windsurf
+
+Em `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
+    }
+  }
+}
+```
+
+---
+
+## VS Code (Cline / MCP nativo)
+
+### VS Code (`.vscode/mcp.json`)
+
+```json
+{
+  "servers": {
+    "orcamento": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
+    }
+  }
+}
+```
+
+### Cline (extensão VS Code)
+No arquivo `cline_mcp_settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"],
+      "disabled": false
+    }
+  }
+}
+```
+
+---
+
+## Continue.dev
+
+Em `~/.continue/config.json`:
+
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [
+      {
+        "transport": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@aredes.me/mcp-orcamento"]
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
+## MCP Inspector
+
+Inspecione schemas, descrições e execute chamadas ao vivo no navegador:
+
+```bash
+npx @modelcontextprotocol/inspector npx -y @aredes.me/mcp-orcamento
+```
+
+---
+
+## Cliente HTTP / Streamable HTTP / Cloudflare Worker
+
+Suba o servidor HTTP local:
+
+```bash
+MCP_TRANSPORT=http MCP_HTTP_PORT=3000 npx -y @aredes.me/mcp-orcamento
+# Ou a partir do build local:
+# MCP_TRANSPORT=http MCP_HTTP_PORT=3000 node build/lib/bin/mcp-orcamento.js
+```
+
+Verifique saúde e liste ferramentas via Streamable HTTP (`POST /mcp`) ou REST no Cloudflare Worker (`POST /tools/{toolName}`):
+
+```bash
+# Health check
+curl -s http://127.0.0.1:3000/health | jq .
+
+# Streamable HTTP (CLI Node ou Worker)
+curl -s -X POST http://127.0.0.1:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "siconfi_entes",
+      "arguments": { "cod_ibge": "3106200", "limit": 1 }
+    }
+  }'
+
+# REST genérico disponível no Cloudflare Worker (adicione Authorization: Bearer <MCP_API_KEY> se protegido)
+curl -s -X POST https://seu-worker.workers.dev/tools/tesouro_operacoes_credito_ckan \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN" \
+  -d '{ "modo": "operacoes_credito_pvl", "uf": "PR", "limit": 2 }'
+```
+
+---
+
+## Ecossistema Integrado (`orcamento` + `dadosbr` + `tse`)
+
+Combine múltiplos servidores da família `@aredes.me/*` no mesmo host (`claude_desktop_config.json`, `.cursor/mcp.json` ou `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "orcamento": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-orcamento"]
+    },
+    "dadosbr": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-dadosbr"]
+    },
+    "tse": {
+      "command": "npx",
+      "args": ["-y", "@aredes.me/mcp-tse"]
+    }
+  }
+}
+```
+
+> Todos os pacotes acima (`@aredes.me/mcp-orcamento@0.1.0`, `@aredes.me/mcp-dadosbr@0.7.0` e `@aredes.me/mcp-tse@0.1.0`) estão publicados no registro npm (ou use `node build/lib/bin/*.js` para execução direta a partir do código-fonte).
+
+---
+
+## Troubleshooting
+
+- **Cliente reporta falha de JSON-RPC na inicialização `stdio`:** confirme que está usando Node.js `22.12+`, `24` ou `26` com `npx -y @aredes.me/mcp-orcamento` (ou apontando para `build/lib/bin/mcp-orcamento.js` após `npm run build` no build local).
+- **Erro HTTP `403 Host header not allowed` em conexão HTTP:** ao acessar por hostname diferente de `localhost`/`127.0.0.1`, informe `MCP_ALLOWED_HOSTS=seu-host.local`.
+- **Erro `401 Unauthorized` no Worker/HTTP:** envie `Authorization: Bearer <MCP_API_KEY>` ou `X-API-Key: <MCP_API_KEY>`.
